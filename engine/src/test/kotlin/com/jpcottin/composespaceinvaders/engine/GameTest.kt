@@ -520,6 +520,32 @@ class ProgressionTest {
         assertEquals(0f, g.invuln, 1e-6f)
     }
 
+    @Test fun anEndScreenShowsNothingInFlight() {
+        val g = playing()
+        g.debug.setLives(1); g.debug.clearInvuln()
+        g.debug.spawnPowerUp(0.3f, 0f, Game.PowerUpType.RAPID)
+        g.debug.setSaucer(0.2f, 0.35f)
+        g.setFire(true); g.update(FRAME)                      // a laser up
+        g.debug.spawnBomb(0f, World.SHIP_Y - 0.03f, 1f)       // and the fatal bomb
+        g.update(FRAME)
+        assertEquals(Game.State.GAME_OVER, g.state)
+        assertTrue(g.lasers.isEmpty() && g.bombs.isEmpty() && g.powerUps.isEmpty())
+        assertNull(g.saucer)
+        assertFalse(g.explosions.isEmpty())                   // the hit's flash still plays out
+    }
+
+    @Test fun theWinScreenShowsNothingInFlight() {
+        val g = playing(10)
+        for (i in g.aliens.indices) g.debug.killAlien(i)
+        g.debug.activatePowerUp(Game.PowerUpType.TRIPLE)
+        g.setFire(true)
+        val b = g.boss!!
+        var t = 0f
+        while (t < 40f && b.alive) { g.debug.setShipX(b.x); g.update(FRAME); t += FRAME }
+        assertEquals(Game.State.WIN, g.state)
+        assertTrue(g.lasers.isEmpty() && g.bombs.isEmpty())
+    }
+
     @Test fun aHugeFrameIsClampedToTheMaximum() {
         val g = playing()
         g.update(5f)
