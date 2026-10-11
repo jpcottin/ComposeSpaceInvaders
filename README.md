@@ -149,7 +149,8 @@ Captured on an Android phone emulator with Auto Play driving.
   DataStore; a round in progress survives process death through the saved
   state (level, score and lives come back with a fresh wave).
 - **Accessibility.** A polite live region announces the round's events; the
-  battlefield's state description says level, invaders left and lives; the
+  battlefield's state description says level, invaders left, lives and,
+  on the last level, the hits the mothership has left; the
   HUD, the gear, the level pick and the end screen carry descriptions.
 - **Languages.** English, French and Spanish, with a generated locale
   config so the app appears in the system's per-app language picker.

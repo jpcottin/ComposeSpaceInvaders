@@ -48,7 +48,7 @@
     <string name="touch_to_resume">TOCA PARA CONTINUAR</string>
     <string name="shortcut_autoplay_short">Piloto automático</string>
     <string name="shortcut_autoplay_long">Mira jugar al piloto automático</string>
-    <string name="a11y_field_state">Nivel %1$d, %2$s, %3$s</string>
+    <string name="a11y_field_state">Nivel %1$d, %2$s, %3$s%4$s</string>
     <string name="a11y_level_start">Empieza el nivel %1$d</string>
     <string name="a11y_level_clear">Nivel %1$d superado</string>
     <string name="a11y_ship_hit">Nave alcanzada, %1$s</string>
@@ -56,6 +56,11 @@
         <item quantity="one">queda %d invasor</item>
         <item quantity="many">quedan %d invasores</item>
         <item quantity="other">quedan %d invasores</item>
+    </plurals>
+    <plurals name="a11y_boss_hits">
+        <item quantity="one">a la nave nodriza le queda %d impacto</item>
+        <item quantity="many">a la nave nodriza le quedan %d impactos</item>
+        <item quantity="other">a la nave nodriza le quedan %d impactos</item>
     </plurals>
     <plurals name="a11y_lives">
         <item quantity="one">%d vida</item>

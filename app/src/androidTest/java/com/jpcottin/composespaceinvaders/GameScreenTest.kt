@@ -304,6 +304,20 @@ class GameScreenTest {
     }
 
     @Test
+    fun aScreenReaderHearsTheMothership() {
+        frames(5)
+        val game = game()
+        scenario.onActivity { game.furthestLevel = 10; game.selectLevel(9) }   // straight to the boss level
+        composeTestRule.onNodeWithContentDescription("Playfield").performClick()
+        frames(5)
+        assertEquals(10, game.level)
+        composeTestRule.onNodeWithContentDescription("Playfield").assert(
+            SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Level 10, 16 invaders left, 3 lives, the mothership has 16 hits left"),
+        )
+        composeTestRule.onNodeWithContentDescription("Mothership 16").assertExists()
+    }
+
+    @Test
     fun aScreenReaderHearsTheRoundStart() {
         frames(5)
         composeTestRule.onNodeWithContentDescription("Playfield").performClick()

@@ -52,7 +52,8 @@ The first release: the game, the autopilot, and the screens it plays on.
   picker.
 - A screen reader hears the round: level begins and cleared, the ship
   hit with the lives left, game over and win with the score, pause; the
-  battlefield describes level, invaders left and lives.
+  battlefield describes level, invaders left, lives and the mothership's
+  hits left.
 - Settings is a centred dialog on a wide window and a bottom sheet on a
   phone.
 - Predictive back, and a portrait default size for free-form windows.

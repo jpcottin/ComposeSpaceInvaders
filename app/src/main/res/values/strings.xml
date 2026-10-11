@@ -48,13 +48,17 @@
     <string name="touch_to_resume">TOUCH TO RESUME</string>
     <string name="shortcut_autoplay_short">Auto Play</string>
     <string name="shortcut_autoplay_long">Watch the autopilot play</string>
-    <string name="a11y_field_state">Level %1$d, %2$s, %3$s</string>
+    <string name="a11y_field_state">Level %1$d, %2$s, %3$s%4$s</string>
     <string name="a11y_level_start" tools:ignore="PluralsCandidate">Level %1$d begins</string>
     <string name="a11y_level_clear" tools:ignore="PluralsCandidate">Level %1$d cleared</string>
     <string name="a11y_ship_hit">Ship hit, %1$s left</string>
     <plurals name="a11y_invaders_left">
         <item quantity="one">%d invader left</item>
         <item quantity="other">%d invaders left</item>
+    </plurals>
+    <plurals name="a11y_boss_hits">
+        <item quantity="one">the mothership has %d hit left</item>
+        <item quantity="other">the mothership has %d hits left</item>
     </plurals>
     <plurals name="a11y_lives">
         <item quantity="one">%d life</item>
