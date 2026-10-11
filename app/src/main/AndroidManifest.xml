@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- TV: declare leanback support, mark touchscreen as not required -->
+    <uses-feature android:name="android.software.leanback" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+
+    <application
+        android:name=".SpaceInvadersApplication"
+        android:allowBackup="true"
+        android:enableOnBackInvokedCallback="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:banner="@drawable/tv_banner"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ComposeSpaceInvaders">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|density|screenSize|smallestScreenSize|colorMode|layoutDirection">
+            <!-- Phone / foldable / tablet / XR launcher -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- TV launcher -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+            <!-- Long-press menu on the launcher icon -->
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <!-- A free-form window (an Android XR panel, a desktop window)
+                 opens portrait, the shape of a phone: the wave has the room
+                 to march that the game was tuned for. -->
+            <layout
+                android:defaultWidth="540dp"
+                android:defaultHeight="960dp"
+                android:minWidth="320dp"
+                android:minHeight="480dp"
+                android:gravity="center" />
+        </activity>
+
+        <!-- The same game on a paired pair of AI Glasses (Settings -> Glasses):
+             launched onto the projected display, touchbar controls, black
+             background. -->
+        <activity
+            android:name=".glasses.GlassesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ComposeSpaceInvaders.Glasses"
+            android:requiredDisplayCategory="@string/display_category_xr_projected"
+            tools:ignore="UnusedAttribute"
+            android:configChanges="orientation|keyboardHidden|screenSize|screenLayout|density|uiMode" />
+    </application>
+
+</manifest>

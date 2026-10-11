@@ -1,0 +1,227 @@
+package com.jpcottin.composespaceinvaders.ui
+
+import android.content.Context
+import android.os.Build
+import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.jpcottin.composespaceinvaders.audio.AudioOutput
+import com.jpcottin.composespaceinvaders.engine.Game
+import com.jpcottin.composespaceinvaders.engine.GameHost
+import com.jpcottin.composespaceinvaders.engine.HighScore
+import com.jpcottin.composespaceinvaders.engine.SoundEvent
+import com.jpcottin.composespaceinvaders.glasses.GlassesSession
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+
+private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+
+/** The player's choices, persisted in DataStore. */
+data class Settings(
+    val soundEnabled: Boolean = true,
+    val autoPlay: Boolean = false,
+    val haptics: Boolean = true,
+)
+
+/**
+ * Owns the [Game] for the activity's lifetime (it survives rotation and
+ * fold/unfold), persists settings and high scores, owns the audio output
+ * and the vibrator, and is the [GameHost] the engine talks to. A round in
+ * progress also survives process death: level, score and lives go into the
+ * saved state, and the next instance resumes them with a fresh wave. The
+ * frame loop lives in the composable that draws the game; this class only
+ * exposes the engine and the persisted state.
+ */
+class GameViewModel(
+    private val store: DataStore<Preferences>,
+    savedState: SavedStateHandle,
+    private val vibrator: Vibrator?,
+    val role: Role = Role.PHONE,
+) : ViewModel(), GameHost {
+
+    /** Which screen this engine plays on. */
+    enum class Role {
+        /** The phone: the strip steers, the gear opens Settings, Settings can hand the game to the glasses. */
+        PHONE,
+        /** The glasses' projected display: the whole touchbar steers, no gear, black background. */
+        GLASSES,
+    }
+
+    val game: Game = Game(host = this)
+
+    /** The synth and its speaker thread. Paused unless the activity is resumed. */
+    val audio = AudioOutput()
+
+    /** Last persisted settings; the switches in the settings sheet edit these. */
+    val settings = store.data.map { prefs ->
+        Settings(
+            soundEnabled = prefs[KEY_SOUND] ?: true,
+            autoPlay = prefs[KEY_AUTO_PLAY] ?: false,
+            haptics = prefs[KEY_HAPTICS] ?: true,
+        )
+    }
+
+    init {
+        game.seed(System.nanoTime().toInt())
+        if (role == Role.GLASSES) game.controlMode = Game.ControlMode.TOUCHBAR
+        else viewModelScope.launch {
+            // The phone freezes while the glasses play, and adopts whatever the
+            // glasses instance scored when the session ends.
+            GlassesSession.active.collect { active ->
+                game.glassesActive = active
+                if (!active) game.restoreHighScores(decodeScores(store.data.first()[KEY_HIGH_SCORES]) + game.highScores)
+            }
+        }
+        // The round saved by a previous instance of this process, if any.
+        savedState.get<Bundle>(KEY_SESSION)?.let { s ->
+            if (s.getBoolean(SESSION_MID_GAME))
+                game.restoreSession(s.getInt(SESSION_LEVEL), s.getLong(SESSION_SCORE), s.getInt(SESSION_LIVES))
+        }
+        savedState.setSavedStateProvider(KEY_SESSION) {
+            Bundle().apply {
+                putBoolean(SESSION_MID_GAME, game.isMidGame)
+                putInt(SESSION_LEVEL, game.level)
+                putLong(SESSION_SCORE, game.score)
+                putInt(SESSION_LIVES, game.lives)
+            }
+        }
+        viewModelScope.launch {
+            val prefs = store.data.first()
+            game.soundEnabled = prefs[KEY_SOUND] ?: true
+            game.autoPlayActive = prefs[KEY_AUTO_PLAY] ?: false
+            hapticsEnabled = prefs[KEY_HAPTICS] ?: true
+            game.restoreHighScores(decodeScores(prefs[KEY_HIGH_SCORES]))
+            // A restored session may already sit past the stored record.
+            game.furthestLevel = maxOf(game.furthestLevel, prefs[KEY_FURTHEST_LEVEL] ?: 1)
+            // A launch asked for an unattended round: Auto Play on, round
+            // started. It comes after the settings load so the stored switch
+            // cannot turn the autopilot back off, and the handle carries the
+            // launching intent's extras, so this runs once per ViewModel
+            // whatever the activity does.
+            //   adb shell am start -n com.jpcottin.composespaceinvaders/.MainActivity --ez autoplay true
+            if (savedState.get<Boolean>(EXTRA_AUTOPLAY) == true) startUnattendedRound()
+        }
+    }
+
+    fun setSoundEnabled(on: Boolean) {
+        game.soundEnabled = on
+        viewModelScope.launch { store.edit { it[KEY_SOUND] = on } }
+    }
+
+    fun setAutoPlay(on: Boolean) {
+        game.autoPlayActive = on
+        viewModelScope.launch { store.edit { it[KEY_AUTO_PLAY] = on } }
+    }
+
+    /** Whether the vibrator speaks at all: the Haptics switch in Settings. */
+    @Volatile private var hapticsEnabled = true
+
+    fun setHaptics(on: Boolean) {
+        hapticsEnabled = on
+        viewModelScope.launch { store.edit { it[KEY_HAPTICS] = on } }
+    }
+
+    /** Auto Play on and a round started: the game plays itself from here. */
+    fun startUnattendedRound() {
+        setAutoPlay(true)
+        if (game.state == Game.State.TITLE) game.tap()
+    }
+
+    /** Forget the high scores and the furthest level, in the game and on disk. */
+    fun resetProgress() {
+        game.restoreHighScores(emptyList())
+        game.furthestLevel = 1
+        viewModelScope.launch { store.edit { it.remove(KEY_HIGH_SCORES); it.remove(KEY_FURTHEST_LEVEL) } }
+    }
+
+    override fun onCleared() {
+        audio.release()
+    }
+
+    // ── GameHost ──────────────────────────────────────────────────────────────
+
+    override fun sound(event: SoundEvent) = audio.synth.trigger(event)
+    override fun march(step: Int) = audio.synth.march(step)
+    override fun saucer(on: Boolean) { audio.synth.saucer = on }
+    override fun music(on: Boolean) { audio.synth.musicEnabled = on }
+
+    /** The ship was hit: a heavy click under the finger. */
+    override fun haptic() {
+        val v = vibrator ?: return
+        if (!hapticsEnabled || !v.hasVibrator()) return
+        val effect = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK)
+        else VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE)
+        v.vibrate(effect)
+    }
+
+    override fun furthestLevelChanged(level: Int) {
+        viewModelScope.launch { store.edit { it[KEY_FURTHEST_LEVEL] = maxOf(it[KEY_FURTHEST_LEVEL] ?: 1, level) } }
+    }
+
+    override fun highScoresChanged(table: List<HighScore>) {
+        // The phone and the glasses instances share the store: fold the other
+        // one's rows in rather than overwrite them.
+        viewModelScope.launch {
+            store.edit { prefs ->
+                val merged = (decodeScores(prefs[KEY_HIGH_SCORES]) + table)
+                    .distinct().sortedByDescending { it.score }.take(Game.MAX_SCORES)
+                prefs[KEY_HIGH_SCORES] = encodeScores(merged)
+            }
+        }
+    }
+
+    companion object {
+        private val KEY_SOUND = booleanPreferencesKey("sound")
+        private val KEY_AUTO_PLAY = booleanPreferencesKey("auto_play")
+        private val KEY_HAPTICS = booleanPreferencesKey("haptics")
+        private val KEY_HIGH_SCORES = stringPreferencesKey("high_scores")
+        private val KEY_FURTHEST_LEVEL = intPreferencesKey("furthest_level")
+        private const val KEY_SESSION = "session"
+        /** Intent extra: start an Auto Play round as soon as the game is up. */
+        const val EXTRA_AUTOPLAY = "autoplay"
+        private const val SESSION_MID_GAME = "midGame"
+        private const val SESSION_LEVEL = "level"
+        private const val SESSION_SCORE = "score"
+        private const val SESSION_LIVES = "lives"
+
+        /** "score:level,score:level,..." — small enough that a string key is the simplest store. */
+        internal fun encodeScores(table: List<HighScore>): String =
+            table.joinToString(",") { "${it.score}:${it.level}" }
+
+        internal fun decodeScores(encoded: String?): List<HighScore> =
+            encoded.orEmpty().split(',').mapNotNull { entry ->
+                val parts = entry.split(':')
+                val score = parts.getOrNull(0)?.toLongOrNull() ?: return@mapNotNull null
+                val level = parts.getOrNull(1)?.toIntOrNull() ?: return@mapNotNull null
+                if (score <= 0L) null else HighScore(score, level)
+            }
+
+        fun factory(context: Context, role: Role = Role.PHONE): ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val app = context.applicationContext
+                val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                    (app.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager)?.defaultVibrator
+                else @Suppress("DEPRECATION") (app.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator)
+                GameViewModel(app.settingsStore, createSavedStateHandle(), vibrator, role)
+            }
+        }
+    }
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- The game in one glance, inside the 66dp safe zone: a crab invader in
+         its green, a laser on its way up, and the ship below. The invader is
+         the classic 11x8 bitmap expanded into squares. -->
+    <path android:fillColor="#4DF28C" android:pathData="M37.9,27.0h4.6v4.6h-4.6z M65.5,27.0h4.6v4.6h-4.6z M42.5,31.6h4.6v4.6h-4.6z M60.9,31.6h4.6v4.6h-4.6z M37.9,36.2h4.6v4.6h-4.6z M42.5,36.2h4.6v4.6h-4.6z M47.1,36.2h4.6v4.6h-4.6z M51.7,36.2h4.6v4.6h-4.6z M56.3,36.2h4.6v4.6h-4.6z M60.9,36.2h4.6v4.6h-4.6z M65.5,36.2h4.6v4.6h-4.6z M33.3,40.8h4.6v4.6h-4.6z M37.9,40.8h4.6v4.6h-4.6z M47.1,40.8h4.6v4.6h-4.6z M51.7,40.8h4.6v4.6h-4.6z M56.3,40.8h4.6v4.6h-4.6z M65.5,40.8h4.6v4.6h-4.6z M70.1,40.8h4.6v4.6h-4.6z M28.7,45.4h4.6v4.6h-4.6z M33.3,45.4h4.6v4.6h-4.6z M37.9,45.4h4.6v4.6h-4.6z M42.5,45.4h4.6v4.6h-4.6z M47.1,45.4h4.6v4.6h-4.6z M51.7,45.4h4.6v4.6h-4.6z M56.3,45.4h4.6v4.6h-4.6z M60.9,45.4h4.6v4.6h-4.6z M65.5,45.4h4.6v4.6h-4.6z M70.1,45.4h4.6v4.6h-4.6z M74.7,45.4h4.6v4.6h-4.6z M28.7,50.0h4.6v4.6h-4.6z M37.9,50.0h4.6v4.6h-4.6z M42.5,50.0h4.6v4.6h-4.6z M47.1,50.0h4.6v4.6h-4.6z M51.7,50.0h4.6v4.6h-4.6z M56.3,50.0h4.6v4.6h-4.6z M60.9,50.0h4.6v4.6h-4.6z M65.5,50.0h4.6v4.6h-4.6z M74.7,50.0h4.6v4.6h-4.6z M28.7,54.6h4.6v4.6h-4.6z M37.9,54.6h4.6v4.6h-4.6z M65.5,54.6h4.6v4.6h-4.6z M74.7,54.6h4.6v4.6h-4.6z M42.5,59.2h4.6v4.6h-4.6z M47.1,59.2h4.6v4.6h-4.6z M56.3,59.2h4.6v4.6h-4.6z M60.9,59.2h4.6v4.6h-4.6z" />
+    <!-- laser -->
+    <path android:fillColor="#66D9FF" android:fillAlpha="0.5" android:pathData="M51.5,66h5v9a2.5,2.5 0 0 1 -5,0z" />
+    <path android:fillColor="#FFFFCC" android:pathData="M52.8,67h2.4v7a1.2,1.2 0 0 1 -2.4,0z" />
+    <!-- ship -->
+    <path android:fillColor="#3A4A66" android:pathData="M54,76 L68,89 L62,91 L54,86 L46,91 L40,89 Z" />
+    <path android:fillColor="#4DB8F2" android:pathData="M54,72 L58,90 L50,90 Z" />
+    <path android:fillColor="#CCF2FF" android:pathData="M54,72 L55.4,79 L52.6,79 Z" />
+</vector>

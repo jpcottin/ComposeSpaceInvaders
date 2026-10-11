@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Compose Space Invaders</string>
+    <string name="title_line_1">SPACE</string>
+    <string name="title_line_2">INVADERS</string>
+    <string name="tap_to_play">Tap to play</string>
+    <string name="press_to_play">Press OK to play</string>
+    <string name="touch_to_play">Touch the bar to play</string>
+    <string name="level_clear">LEVEL</string>
+    <string name="game_over">GAME OVER</string>
+    <string name="you_win">YOU WIN</string>
+    <string name="new_high_score">NEW HIGH SCORE</string>
+    <string name="mothership">MOTHERSHIP</string>
+    <string name="hud_score">Score</string>
+    <string name="hud_lives">Lives</string>
+    <string name="hud_level">Level</string>
+    <string name="auto_badge">AUTO</string>
+    <string name="slide_to_steer">SLIDE HERE TO STEER AND FIRE</string>
+    <string name="settings">Settings</string>
+    <string name="settings_sound">Sound</string>
+    <string name="settings_sound_hint">Effects, the march and the ambient track</string>
+    <string name="settings_haptics">Haptics</string>
+    <string name="settings_haptics_hint">A click when the ship is hit</string>
+    <string name="settings_auto_play">Auto Play</string>
+    <string name="settings_auto_play_hint">The autopilot plays the round for you</string>
+    <string name="settings_done">Done</string>
+    <string name="settings_glasses">Glasses</string>
+    <string name="settings_glasses_none">No AI Glasses paired</string>
+    <string name="settings_glasses_connected">Paired: play on the glasses, the touchbar steers and fires</string>
+    <string name="settings_glasses_active">Playing on the glasses; the phone waits</string>
+    <string name="settings_glasses_play">Play</string>
+    <string name="settings_glasses_phone">Phone</string>
+    <string name="settings_glasses_unavailable">None</string>
+    <string name="settings_reset">Reset progress</string>
+    <string name="settings_reset_hint">Forget the high scores and the level record</string>
+    <string name="reset_confirm_title">Reset progress?</string>
+    <string name="reset_confirm_text">The high scores and the furthest level reached are cleared. There is no undo.</string>
+    <string name="reset_confirm_yes">Reset</string>
+    <string name="cancel">Cancel</string>
+    <string name="on_glasses">ON GLASSES</string>
+    <string name="on_glasses_hint">Settings brings the game back</string>
+    <string name="start_level" tools:ignore="PluralsCandidate">LEVEL %1$d</string>
+    <string name="a11y_previous_level">Previous level</string>
+    <string name="a11y_next_level">Next level</string>
+    <string name="paused">PAUSED</string>
+    <string name="tap_to_resume">TAP TO RESUME</string>
+    <string name="press_to_resume">PRESS OK TO RESUME</string>
+    <string name="touch_to_resume">TOUCH TO RESUME</string>
+    <string name="shortcut_autoplay_short">Auto Play</string>
+    <string name="shortcut_autoplay_long">Watch the autopilot play</string>
+    <string name="a11y_field_state">Level %1$d, %2$s, %3$s</string>
+    <string name="a11y_level_start" tools:ignore="PluralsCandidate">Level %1$d begins</string>
+    <string name="a11y_level_clear" tools:ignore="PluralsCandidate">Level %1$d cleared</string>
+    <string name="a11y_ship_hit">Ship hit, %1$s left</string>
+    <plurals name="a11y_invaders_left">
+        <item quantity="one">%d invader left</item>
+        <item quantity="other">%d invaders left</item>
+    </plurals>
+    <plurals name="a11y_lives">
+        <item quantity="one">%d life</item>
+        <item quantity="other">%d lives</item>
+    </plurals>
+    <string name="a11y_game_over">Game over, score %1$d</string>
+    <string name="a11y_win">You win, score %1$d</string>
+    <string name="a11y_paused">Game paused</string>
+    <string name="display_category_xr_projected" translatable="false">xr_projected</string>
+</resources>
