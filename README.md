@@ -228,14 +228,28 @@ level, reset the progress and listen as a screen reader.
 
 ## CI/CD
 
-GitHub Actions runs on every push and pull request to `main`: the host
-jobs (engine tests, lint, unit tests, screenshots, the APKs, the bench), the
-instrumented tests on emulators (phones at API 33 to 36, a foldable, a TV,
-with non-blocking legs on an XR headset, a swiftshader comparison and the
-API 37.0, 37.1 and 37.2 images from the stable and canary emulators), and
-the emulator experiments (the Android CLI, the Emulator Preview package, and
-the multi-run snapshot cycles that launch an unattended round and check it
-survives a restore). Changes are listed in the [changelog](CHANGELOG.md).
+GitHub Actions runs on every push and pull request to `main`. The first
+three jobs gate the merge; the rest explore newer emulators and tooling and
+are marked `continue-on-error`, so a preview package that moves underneath
+us reports its findings without blocking a PR. Every emulator leg runs with
+full diagnostics (`-verbose -show-kernel -debug-metrics -metrics-collection`)
+on the lavapipe software Vulkan GPU or the emulator's auto choice, and posts
+a per-test summary to the run.
+
+| Job | What it does | Gates |
+|-----|-------------|-------|
+| **Build, lint, tests, screenshots** | Engine JUnit tests, Android lint, app unit tests, Compose preview screenshot validation, the debug and the minified release APK (`apks` artifact) | yes |
+| **Auto Play bench** | Seeded campaigns with the autopilot on a portrait phone (100) and a landscape screen (50); fails under a 95% campaign win rate | yes |
+| **Instrumented** | The instrumented tests (title, a round by tap, D-pad and keyboard, pause from every path, the level pick, the settings sheet, a screen reader) on emulators: phones at API 33, 34, 35 and 36, a foldable and a TV at API 36, with `-delay-adb` so a device going offline mid-boot cannot fail a leg. The TV leg boots its emulator itself (`.github/scripts/boot-emulator.sh`): that image restarts adbd right after boot and the runner action's first key press used to meet it | yes |
+| **Instrumented, experimental** | The same tests on an XR headset (API 34, `google-xr`), on a swiftshader comparison leg, and on the API 37.0, 37.1 and 37.2 page-size-16k images with the stable and canary emulators, lavapipe and auto GPU | no |
+| **Android CLI experiment** | The whole emulator flow through the Android CLI (`android sdk install`, `android emulator create/start/stop`) on the canary emulator, API 37.0 and 37.2 | no |
+| **Emulator Preview experiment** | The `emulators;latest` preview package launched by its own binary, API 37.0 and 37.2 | no |
+| **Emulator Preview multi-run** / **Android CLI multi-run** | Four boot cycles with snapshots: the game is launched once with Auto Play (`--ez autoplay true`), each cycle shuts the emulator down gracefully, and the next one checks the app is still running, drawing, and that the score read from the HUD did not go back. The Android CLI run plays the shrunk release APK, the only job that does | no |
+
+The multi-runs use the launch extra `adb shell am start -n
+com.jpcottin.composespaceinvaders/.MainActivity --ez autoplay true`, which
+turns Auto Play on and starts a round: a way to watch the game play itself
+from any script. Changes are listed in the [changelog](CHANGELOG.md).
 
 ## License
 
