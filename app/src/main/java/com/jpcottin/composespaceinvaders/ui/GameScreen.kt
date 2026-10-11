@@ -199,11 +199,14 @@ fun GameScreen(
     // Back during a round freezes it rather than leaving; once paused, Back
     // leaves as it always did.
     BackHandler(enabled = game.state == Game.State.PLAYING && !game.paused) { game.pause() }
+    val boss = game.boss
+    val bossState = if (boss != null && boss.alive) ", " + pluralStringResource(R.plurals.a11y_boss_hits, boss.hp, boss.hp) else ""
     val fieldState = if (game.isMidGame)
         stringResource(
             R.string.a11y_field_state, game.level,
             pluralStringResource(R.plurals.a11y_invaders_left, game.aliveAliens, game.aliveAliens),
             pluralStringResource(R.plurals.a11y_lives, game.lives, game.lives),
+            bossState,
         )
     else ""
     val content: @Composable (Modifier) -> Unit = { playfieldModifier ->

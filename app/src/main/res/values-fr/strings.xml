@@ -48,7 +48,7 @@
     <string name="touch_to_resume">TOUCHEZ POUR REPRENDRE</string>
     <string name="shortcut_autoplay_short">Pilote automatique</string>
     <string name="shortcut_autoplay_long">Regarder le pilote automatique jouer</string>
-    <string name="a11y_field_state">Niveau %1$d, %2$s, %3$s</string>
+    <string name="a11y_field_state">Niveau %1$d, %2$s, %3$s%4$s</string>
     <string name="a11y_level_start">Le niveau %1$d commence</string>
     <string name="a11y_level_clear">Niveau %1$d terminé</string>
     <string name="a11y_ship_hit">Vaisseau touché, %1$s</string>
@@ -56,6 +56,11 @@
         <item quantity="one">%d envahisseur restant</item>
         <item quantity="many">%d envahisseurs restants</item>
         <item quantity="other">%d envahisseurs restants</item>
+    </plurals>
+    <plurals name="a11y_boss_hits">
+        <item quantity="one">le vaisseau-mère encaisse encore %d tir</item>
+        <item quantity="many">le vaisseau-mère encaisse encore %d tirs</item>
+        <item quantity="other">le vaisseau-mère encaisse encore %d tirs</item>
     </plurals>
     <plurals name="a11y_lives">
         <item quantity="one">%d vie</item>
