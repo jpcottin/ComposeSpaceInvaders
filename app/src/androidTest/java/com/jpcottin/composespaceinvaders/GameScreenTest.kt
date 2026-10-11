@@ -145,6 +145,29 @@ class GameScreenTest {
     }
 
     @Test
+    fun theDpadCentreStartsTheRoundThenFires() {
+        // On a TV the same button starts the round and, held during it,
+        // holds the trigger: OK is a tap on the title and the fire key in play.
+        frames(5)
+        val playfield = focusThePlayfield()
+        playfield.performKeyInput { keyDown(Key.DirectionCenter); keyUp(Key.DirectionCenter) }
+        val game = game()
+        stepUntil(10) { game.state == Game.State.PLAYING }
+        assertEquals(Game.State.PLAYING, game.state)
+        assertEquals(0, game.shotsFired)                             // the tap that started it fired nothing
+        playfield.performKeyInput { keyDown(Key.DirectionCenter) }
+        stepUntil(10) { game.shotsFired > 0 }
+        assertTrue("OK held should fire", game.shotsFired > 0)
+        frames(60)                                                   // still held: the volleys keep coming
+        assertTrue("OK held should keep firing", game.shotsFired >= 2)
+        playfield.performKeyInput { keyUp(Key.DirectionCenter) }
+        frames(2)
+        val fired = game.shotsFired
+        frames(60)
+        assertEquals(fired, game.shotsFired)                         // released: the trigger is up
+    }
+
+    @Test
     fun theFireKeyHoldsTheTrigger() {
         val game = startARound()
         val playfield = focusThePlayfield()
