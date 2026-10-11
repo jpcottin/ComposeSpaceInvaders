@@ -20,6 +20,18 @@ same way.
 > Play, and it plays on a phone, a foldable (open, closed or half-opened), a
 > tablet, an XR panel, a TV with a D-pad and a pair of AI Glasses.
 
+## Screenshots
+
+Captured on an Android phone emulator with Auto Play driving.
+
+| Title, after a won campaign | Level 1 in play | The mothership |
+|---|---|---|
+| <img src="docs/screenshots/phone-title.png" width="270" alt="Title screen: COMPOSE SPACE INVADERS over the demo wave, the podium with one score, the level pick between two arrows, Tap to play and the ship"> | <img src="docs/screenshots/phone-play.png" width="270" alt="Level 1 with Auto Play on: the wave thinned, a laser up, a bomb falling, a triple-shot bonus dropping, the rapid-fire bar in the strip"> | <img src="docs/screenshots/phone-mothership.png" width="270" alt="Level 10: the mothership with her health bar, the escort thinned, three lasers of a triple-shot volley, the shield bubble on the ship"> |
+
+| You win, a new high score | Settings |
+|---|---|
+| <img src="docs/screenshots/phone-win.png" width="270" alt="Win screen: rank #1, NEW HIGH SCORE, the score 44,195 in gold, YOU WIN"> | <img src="docs/screenshots/phone-settings.png" width="270" alt="Settings sheet over the title: Sound, Haptics and Auto Play on, Glasses reading NONE, Reset progress"> |
+
 ## The game
 
 - **Goal:** destroy every invader in the wave before it reaches your line.
