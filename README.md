@@ -32,6 +32,16 @@ Captured on an Android phone emulator with Auto Play driving.
 |---|---|
 | <img src="docs/screenshots/phone-win.png" width="270" alt="Win screen: rank #1, NEW HIGH SCORE, the score 44,195 in gold, YOU WIN"> | <img src="docs/screenshots/phone-settings.png" width="270" alt="Settings sheet over the title: Sound, Haptics and Auto Play on, Glasses reading NONE, Reset progress"> |
 
+The other screens, as the screenshot tests render them:
+
+| Foldable half-opened: the control surface under the hinge | TV: overscan-safe HUD, the wave in the middle |
+|---|---|
+| <img src="docs/screenshots/foldable-tabletop.png" width="420" alt="Tabletop posture: the battlefield in the upper half, SLIDE HERE TO STEER AND FIRE and the ship marker in the lower half"> | <img src="docs/screenshots/tv-playing.png" width="480" alt="TV: the wave centred on a 16:9 screen, the score and the level in large text at the corners"> |
+
+| AI Glasses: black background, no gear | The ten waves |
+|---|---|
+| <img src="docs/screenshots/glasses-playing.png" width="420" alt="The glasses' projected display: the wave on pure black, the HUD at the corners, no gear"> | <img src="docs/screenshots/waves.png" width="300" alt="The ten levels' formations side by side: three rows at level 1 up to five, the two-row escort at level 10"> |
+
 ## The game
 
 - **Goal:** destroy every invader in the wave before it reaches your line.
