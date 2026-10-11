@@ -162,8 +162,12 @@ jobs:
             memory: 2048
           # The TV image restarts adbd right after the boot completes, under
           # the emulator-runner action's own post-boot key press: the press
-          # fails and takes the leg with it about one run in twenty. This
-          # leg boots its emulator itself and lets the device settle first.
+          # fails and takes the leg with it about one run in twenty (a rerun
+          # passes). Booting the emulator ourselves (self-boot: true, see
+          # .github/scripts/boot-emulator.sh) avoids that press but the TV
+          # guest has stalled during its boot on the runner, twice out of
+          # two, while the same image boots in 20 s on a workstation; until
+          # that is understood the leg stays on the action.
           - name: TV API 36
             api-level: '36'
             target: android-tv
@@ -171,7 +175,6 @@ jobs:
             gpu: lavapipe
             ram-size: 2048M
             memory: 2048
-            self-boot: true
           # The XR image insists on a hardware GPU (its XR mode UI and guest
           # ANGLE need one) and refuses to boot without: with those two
           # features off it boots on lavapipe, the software Vulkan device.
