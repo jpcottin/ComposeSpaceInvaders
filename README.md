@@ -183,9 +183,10 @@ and lasers lost off-screen:
 
 Runs are seeded, so two builds of the same code give the same numbers and a
 change to the autopilot is a before/after comparison. CI plays 100 portrait
-and 50 landscape campaigns and fails when fewer than 95% are won. The
-current autopilot wins 100% of campaigns on both, in 98 s on a portrait
-phone and 132 s on a landscape screen on average.
+campaigns, 50 on a landscape screen and 50 on a foldable's inner screen, and
+fails when fewer than 95% are won. The current autopilot wins 100% of
+campaigns on all three, in 98 s on a portrait phone, 132 s on a landscape
+screen and 110 s on the foldable on average.
 
 ## Build & run
 
@@ -239,7 +240,7 @@ a per-test summary to the run.
 | Job | What it does | Gates |
 |-----|-------------|-------|
 | **Build, lint, tests, screenshots** | Engine JUnit tests, Android lint, app unit tests, Compose preview screenshot validation, the debug and the minified release APK (`apks` artifact) | yes |
-| **Auto Play bench** | Seeded campaigns with the autopilot on a portrait phone (100) and a landscape screen (50); fails under a 95% campaign win rate | yes |
+| **Auto Play bench** | Seeded campaigns with the autopilot on a portrait phone (100), a landscape screen (50) and a foldable's inner screen (50); fails under a 95% campaign win rate | yes |
 | **Instrumented** | The instrumented tests (title, a round by tap, D-pad and keyboard, pause from every path, the level pick, the settings sheet, a screen reader) on emulators: phones at API 33, 34, 35 and 36, a foldable and a TV at API 36, with `-delay-adb` so a device going offline mid-boot cannot fail a leg. The TV leg boots its emulator itself (`.github/scripts/boot-emulator.sh`): that image restarts adbd right after boot and the runner action's first key press used to meet it | yes |
 | **Instrumented, experimental** | The same tests on an XR headset (API 34, `google-xr`), on a swiftshader comparison leg, and on the API 37.0, 37.1 and 37.2 page-size-16k images with the stable and canary emulators, lavapipe and auto GPU | no |
 | **Android CLI experiment** | The whole emulator flow through the Android CLI (`android sdk install`, `android emulator create/start/stop`) on the canary emulator, API 37.0 and 37.2 | no |
