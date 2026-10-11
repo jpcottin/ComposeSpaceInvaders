@@ -121,6 +121,99 @@ class AutoPlayTest {
         assertEquals(Game.State.WIN, g.state)
     }
 
+    // ── Column choices ───────────────────────────────────────────────────────
+    // The wave at level 1 starts high: on a portrait phone it is no threat
+    // yet, and the pick is the nearest column. Pushed down to where it would
+    // reach the ship before a volley per invader clears it, the pick turns
+    // to the edge columns; with the bottom row about to land, to that row.
+
+    /** Column [c]'s x when the formation sits at [x]. */
+    private fun colX(x: Float, c: Int) = x + (c - (World.COLS - 1) * 0.5f) * World.COL_STEP
+
+    @Test fun takesTheNearestColumnWhenTheWaveIsNoThreat() {
+        val g = auto()
+        g.debug.setShipX(0.30f)                               // under column 7, at the right edge
+        g.update(FRAME)
+        assertTrue("aim ${g.aiTarget}", g.aiTarget in 0.25f..0.40f)
+    }
+
+    @Test fun narrowsAWaveThatOutrunsItsLasers() {
+        val g = auto()
+        g.debug.setFormation(y = 0.10f)                       // six step-downs from the ship's line
+        g.debug.setShipX(0f)                                  // columns 3 and 4 are the nearest
+        g.update(FRAME)
+        assertTrue("aim ${g.aiTarget}", g.aiTarget < -0.20f)  // the left edge, nearer on a tie
+        g.debug.killAlien(2 * World.COLS + 7)                 // the right edge is one invader thinner
+        g.update(FRAME)
+        assertTrue("aim ${g.aiTarget}", g.aiTarget > 0.20f)
+    }
+
+    @Test fun defendsTheBottomRowWhenItIsAboutToLand() {
+        val g = auto()
+        for (c in 0 until World.COLS) if (c != 5) g.debug.killAlien(2 * World.COLS + c)   // one invader left on the bottom row
+        g.debug.setFormation(y = 0.30f)                       // one step-down from the ship's line
+        g.debug.setShipX(-0.30f)                              // column 0 is the nearest
+        g.update(FRAME)
+        assertTrue("aim ${g.aiTarget}", g.aiTarget > 0.05f)   // column 5 first
+    }
+
+    @Test fun ignoresTheSaucerWhenTheWaveIsAboutToLand() {
+        val g = auto()
+        for (c in 0 until World.COLS) if (c != 5) g.debug.killAlien(2 * World.COLS + c)
+        g.debug.setFormation(y = 0.30f)
+        g.debug.setShipX(-0.30f)
+        g.debug.setSaucer(-0.30f, 0f)                         // a sitting duck right overhead
+        g.update(FRAME)
+        assertTrue("aim ${g.aiTarget}", g.aiTarget > 0.05f)
+    }
+
+    @Test fun theAimNeverLeadsPastTheEdgeBounce() {
+        val g = auto()
+        g.debug.keepOnlyAlien(2 * World.COLS + 7)             // a lone survivor, marching fast
+        g.debug.setFormation(x = 0.08f)                       // about to touch the right margin
+        g.update(FRAME)
+        val x = g.alienX(g.aliens[2 * World.COLS + 7])
+        assertTrue("aim ${g.aiTarget} vs $x", g.aiTarget < x && g.aiTarget > 0f)   // folds back, left of it
+    }
+
+    @Test fun firesAtAColumnOverheadOnTheWayToItsTarget() {
+        val g = auto()
+        g.debug.setFormation(y = 0.10f)                       // under pressure: an edge is the target
+        g.debug.setShipX(colX(0f, 4) + 0.012f)                // standing under column 4 meanwhile (lead included)
+        g.update(FRAME)
+        assertTrue("aim ${g.aiTarget}", abs(g.aiTarget) > 0.20f)
+        assertTrue("not firing, ship at ${g.shipX}", g.aiFiring)
+    }
+
+    @Test fun waitsOutABombLaneInItsPath() {
+        val g = auto()
+        g.debug.keepOnlyAlien(2 * World.COLS + 7)             // the target is far right
+        g.debug.setShipX(-0.30f)
+        g.debug.spawnBomb(0f, 0.40f, 0.5f)                    // a bomb lands on the way just as the ship would cross
+        g.update(FRAME)
+        assertTrue(g.aiHasTarget)
+        assertTrue("aim ${g.aiTarget}", g.aiTarget < 0f)      // stops short of the lane
+    }
+
+    @Test fun dodgesOntoASpotItCanShootFrom() {
+        val g = auto()
+        g.debug.setShipX(0f)
+        g.debug.spawnBomb(0f, 0.30f, 0.5f)                    // right overhead: dodge
+        g.update(FRAME)
+        assertTrue(abs(g.aiTarget) > 0.05f)
+        assertTrue("aim ${g.aiTarget}", g.aiTarget > 0f)      // the side with a column to shoot
+    }
+
+    @Test fun skipsAShieldWhileShielded() {
+        val g = auto()
+        g.debug.keepOnlyAlien(2 * World.COLS)                 // the wave is far left
+        g.debug.activatePowerUp(Game.PowerUpType.SHIELD)
+        g.debug.spawnPowerUp(0.35f, World.SHIP_Y - 0.15f, Game.PowerUpType.SHIELD)
+        g.debug.setShipX(0f)
+        g.update(FRAME)
+        assertTrue("aim ${g.aiTarget}", g.aiTarget < 0f)
+    }
+
     @Test fun drivesTheSameControlPathAsAFinger() {
         val g = auto()
         g.run(0.5f)
