@@ -93,14 +93,17 @@ private fun gameOverGame(aspect: Float): Game = Game().apply {
     step(this, 1.5f)
 }
 
+/** The mothership down to her last hit, the escort gone, one laser away from the win. */
 private fun winGame(aspect: Float): Game = Game().apply {
     setAspect(aspect)
     restoreSession(10, 49640, 3)
     for (i in aliens.indices) debug.killAlien(i)
+    debug.setBossHp(1)
     setFire(true)
     var t = 0f
-    while (t < 40f && boss?.alive == true) { debug.setShipX(boss!!.x); update(1f / 60f); t += 1f / 60f }
+    while (t < 5f && boss?.alive == true) { debug.setShipX(boss!!.x); update(1f / 60f); t += 1f / 60f }
     setFire(false)
+    check(state == Game.State.WIN) { "the mothership survived" }
     step(this, 1f)
 }
 
@@ -155,7 +158,24 @@ fun TitleTabletScreenshot() = Screen(titleGame(TABLET))
 @Composable
 fun TitleTvScreenshot() = Screen(titleGame(TV))
 
+/** A phone on its side: a short window, so the overlays use smaller text
+ *  and the podium keeps its best row only. */
+@PreviewTest
+@Preview(name = "Phone landscape", widthDp = 891, heightDp = 411, showBackground = true)
+@Composable
+fun TitlePhoneLandscapeScreenshot() = Screen(titlePickGame(891f / 411f))
+
 // ── In play ──────────────────────────────────────────────────────────────────
+
+@PreviewTest
+@Preview(name = "Playing phone landscape", widthDp = 891, heightDp = 411, showBackground = true)
+@Composable
+fun PlayingPhoneLandscapeScreenshot() = Screen(playingGame(891f / 411f), autoPlay = true)
+
+@PreviewTest
+@Preview(name = "Game over phone landscape", widthDp = 891, heightDp = 411, showBackground = true)
+@Composable
+fun GameOverPhoneLandscapeScreenshot() = Screen(gameOverGame(891f / 411f))
 
 @PreviewTest
 @Preview(name = "Playing phone", device = Devices.PHONE, showBackground = true)

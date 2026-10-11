@@ -133,8 +133,10 @@ fun DrawScope.drawPlayfield(game: Game) {
     // Everything in play shakes together when the ship is hit.
     translate(m.len(game.shakeX), m.len(game.shakeY)) {
         // The wave. On the title it doubles as the demo formation, drawn
-        // dimmer under the title text.
-        val waveAlpha = if (title) 0.85f else 1f
+        // dimmer under the title text; under an end screen it fades back so
+        // the score and the rank read over it.
+        val ended = game.state == Game.State.GAME_OVER || game.state == Game.State.WIN
+        val waveAlpha = if (title) 0.85f else if (ended) 0.30f else 1f
         val waveShift = if (title) 0.30f else 0f
         for (a in game.aliens) {
             if (!a.alive) continue

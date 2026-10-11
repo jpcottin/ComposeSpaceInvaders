@@ -359,7 +359,8 @@ internal fun EndScreen(game: Game, frame: LongState, title: String, tint: Color,
     Box(Modifier.fillMaxSize().background(tint.copy(alpha = tint.alpha * (0.7f + 0.3f * pulse)))) {
         if (game.newHighScore && game.newHighScoreRank in 0..2) {
             val c = PodiumColors[game.newHighScoreRank]
-            Column(Modifier.atWorld(0f, -0.42f), horizontalAlignment = Alignment.CenterHorizontally) {
+            // Above the wave's top row, which starts at -0.66 at the earliest.
+            Column(Modifier.atWorld(0f, -0.80f), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = "#${game.newHighScoreRank + 1}",
                     style = MaterialTheme.typography.displayMedium.scaled(textScale),
