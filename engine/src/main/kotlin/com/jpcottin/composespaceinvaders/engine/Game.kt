@@ -575,10 +575,21 @@ class Game(private val host: GameHost = GameHost.None) {
 
     private fun endGame(cause: DeathCause) {
         deathCause = cause
-        paused = false
-        state = State.GAME_OVER; stateTimer = 0f
-        syncSiren()
+        endRound(State.GAME_OVER)
         checkHighScore()
+    }
+
+    /** The round is over: nothing in flight is updated any more, so the
+     *  shots and the bonuses are cleared rather than left frozen on the end
+     *  screen; the debris and the flash rings play out. */
+    private fun endRound(end: State) {
+        paused = false
+        lasersList.clear()
+        bombsList.clear()
+        powerUpsList.clear()
+        saucer = null
+        state = end; stateTimer = 0f
+        syncSiren()
     }
 
     // ── Update ────────────────────────────────────────────────────────────────
@@ -839,6 +850,7 @@ class Game(private val host: GameHost = GameHost.None) {
                 if (dx * dx + dy * dy < rad * rad) {
                     b.alive = false
                     applyShipHit(DeathCause.BOMB)
+                    if (state != State.PLAYING) return   // the round ended: the bombs are gone
                 }
             }
         }
@@ -910,9 +922,7 @@ class Game(private val host: GameHost = GameHost.None) {
                         spawnDebris(boss.x, World.BOSS_Y, World.BOSS_HW * 0.6f, 0.85f, 0.25f, 0.75f)
                         sound(SoundEvent.EXPLOSION)
                         sound(SoundEvent.LEVEL_CLEAR)
-                        paused = false
-                        state = State.WIN; stateTimer = 0f
-                        syncSiren()
+                        endRound(State.WIN)
                         checkHighScore()
                         return   // the table is written: the rest of the volley scores nothing
                     }
