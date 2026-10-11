@@ -20,7 +20,7 @@
     <string name="settings_sound">Sonido</string>
     <string name="settings_sound_hint">Los efectos, la marcha y la música de fondo</string>
     <string name="settings_haptics">Vibración</string>
-    <string name="settings_haptics_hint">Un clic cuando la nave recibe un impacto</string>
+    <string name="settings_haptics_hint">Una vibración ligera por un bonus, un clic cuando la nave recibe un impacto</string>
     <string name="settings_auto_play">Piloto automático</string>
     <string name="settings_auto_play_hint">El piloto automático juega la partida por ti</string>
     <string name="settings_done">Listo</string>

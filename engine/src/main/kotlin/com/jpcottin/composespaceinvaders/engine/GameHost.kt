@@ -22,6 +22,8 @@ interface GameHost {
     fun music(on: Boolean) {}
     /** A short pulse: the ship was hit. */
     fun haptic() {}
+    /** A light tick: a bonus was picked up. */
+    fun pickupTick() {}
     /** The high-score table changed and should be persisted. */
     fun highScoresChanged(table: List<HighScore>) {}
     /** A level never seen before was reached; persist it so the title can

@@ -992,6 +992,7 @@ class Game(private val host: GameHost = GameHost.None) {
                 flashBonus(bonus, pu.x, pu.y - 0.06f)
                 applyPowerUp(pu.type)
                 sound(SoundEvent.POWER_UP)
+                host.pickupTick()
             }
         }
         powerUpsList.removeAll { !it.alive }

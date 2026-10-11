@@ -406,11 +406,14 @@ class SaucerTest {
 
 class PowerUpsTest {
     @Test fun collectingAShieldActivatesIt() {
-        val g = playing()
+        val host = RecordingHost()
+        val g = playing(host = host)
         g.debug.spawnPowerUp(0f, World.SHIP_Y - 0.01f, Game.PowerUpType.SHIELD)
         g.run(0.1f)
         assertTrue(g.shieldActive)
         assertEquals(25L, g.score)
+        assertEquals(1, host.ticks)                            // a tick under the finger
+        assertEquals(0, host.haptics)                          // not the hit's click
     }
 
     @Test fun theShieldAbsorbsOneHitThenGrantsAGrace() {
