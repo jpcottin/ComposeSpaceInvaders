@@ -339,6 +339,16 @@ class BombsTest {
         assertEquals(3, g.lives)
     }
 
+    @Test fun aLaserStillInterceptsABombAtTheClampedWorstCaseFrame() {
+        val g = playing()
+        g.debug.setFormation(y = -5f)
+        g.debug.spawnBomb(0f, 0.30f, 0.1f)
+        g.setFire(true)
+        var t = 0f
+        while (t < 2f && g.bombsShot == 0) { g.update(1f); t += Game.MAX_FRAME }
+        assertEquals(1, g.bombsShot)
+    }
+
     @Test fun threeHitsEndTheGame() {
         val g = playing()
         repeat(3) {
