@@ -1449,6 +1449,8 @@ class Game(private val host: GameHost = GameHost.None) {
         fun spawnSaucer() = this@Game.spawnSaucer()
         fun setSaucer(x: Float, vx: Float) { saucer = Saucer(x, World.SAUCER_Y, vx); syncSiren() }
         fun setBossTime(t: Float) { boss?.t = t }
+        /** Leave the mothership with [hp] hits to take (previews of her end). */
+        fun setBossHp(hp: Int) { boss?.hp = hp.coerceIn(1, World.BOSS_HP) }
         fun setScore(s: Long) { score = s }
         fun setLives(n: Int) { lives = n }
         /** The trigger is ready: the cooldown is over and fewer than [World.MAX_LASERS] fly. */
