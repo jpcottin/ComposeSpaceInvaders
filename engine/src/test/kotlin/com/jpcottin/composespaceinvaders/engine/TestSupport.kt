@@ -36,6 +36,7 @@ class RecordingHost : GameHost {
     var siren = false
     var music: Boolean? = null
     var haptics = 0
+    var ticks = 0
     var tables = ArrayList<List<HighScore>>()
     var furthest = 0
     override fun sound(event: SoundEvent) { sounds.add(event) }
@@ -43,6 +44,7 @@ class RecordingHost : GameHost {
     override fun saucer(on: Boolean) { siren = on }
     override fun music(on: Boolean) { music = on }
     override fun haptic() { haptics++ }
+    override fun pickupTick() { ticks++ }
     override fun highScoresChanged(table: List<HighScore>) { tables.add(table) }
     override fun furthestLevelChanged(level: Int) { furthest = level }
 }

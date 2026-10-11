@@ -20,7 +20,7 @@
     <string name="settings_sound">Sound</string>
     <string name="settings_sound_hint">Effects, the march and the ambient track</string>
     <string name="settings_haptics">Haptics</string>
-    <string name="settings_haptics_hint">A click when the ship is hit</string>
+    <string name="settings_haptics_hint">A tick for a bonus, a click when the ship is hit</string>
     <string name="settings_auto_play">Auto Play</string>
     <string name="settings_auto_play_hint">The autopilot plays the round for you</string>
     <string name="settings_done">Done</string>

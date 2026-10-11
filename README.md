@@ -76,7 +76,8 @@ Captured on an Android phone emulator with Auto Play driving.
   explosions, the hit, the level-clear arpeggio, the pickup sparkle, the
   saucer siren, the four-note march bass and an ambient A-minor bed. No
   audio files.
-- **Haptics:** a click when the ship is hit, with a switch in Settings.
+- **Haptics:** a light tick for a bonus picked up, a click when the ship
+  is hit, with a switch in Settings.
 - **Auto Play:** the autopilot dodges incoming bombs (the mothership's angled
   ones too, by predicted impact point), collects a bonus just before it
   lands, lead-aims the mothership, the saucer and the marching columns, and

@@ -28,7 +28,8 @@ The first release: the game, the autopilot, and the screens it plays on.
 - Every sound synthesised in real time: the laser sweep, the explosions,
   the hit, the sparkle, the four-note march bass that follows the wave,
   the saucer's warbling siren and an ambient A-minor bed.
-- Haptics: a click when the ship is hit, with a switch in Settings.
+- Haptics: a light tick for a bonus picked up and a click when the ship
+  is hit, with a switch in Settings.
 
 ### Auto Play
 - The autopilot from the Vulkan version, line for line: it dodges bombs,

@@ -162,6 +162,13 @@ class GameViewModel(
     override fun saucer(on: Boolean) { audio.synth.saucer = on }
     override fun music(on: Boolean) { audio.synth.musicEnabled = on }
 
+    /** A bonus was picked up: a light tick, where the effect exists. */
+    override fun pickupTick() {
+        val v = vibrator ?: return
+        if (!hapticsEnabled || !v.hasVibrator() || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
+        v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+    }
+
     /** The ship was hit: a heavy click under the finger. */
     override fun haptic() {
         val v = vibrator ?: return
