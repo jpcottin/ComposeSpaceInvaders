@@ -564,6 +564,35 @@ class ProgressionTest {
         g.update(5f)
         assertEquals(Game.MAX_FRAME, g.animTime, 1e-4f)
     }
+
+    @Test fun refreshRateDoesNotChangeTheGame() {
+        fun play(frameDt: Float): Triple<Float, Long, Int> {
+            val g = playing()
+            g.touchStrip(0.30f)
+            var t = 0f
+            while (t < 4f - 1e-4f) { g.update(frameDt); t += frameDt }
+            return Triple(g.shipX, g.score, g.lives)
+        }
+        val at60 = play(1f / 60f)
+        val at90 = play(1f / 90f)
+        val at120 = play(1f / 120f)
+        assertEquals(at60.first, at90.first, 1e-4f)
+        assertEquals(at60.first, at120.first, 1e-4f)
+        assertEquals(at60.second, at90.second)
+        assertEquals(at60.second, at120.second)
+        assertEquals(at60.third, at90.third)
+        assertEquals(at60.third, at120.third)
+    }
+
+    @Test fun theRemainderOfAFrameCarriesOver() {
+        val g = newGame()
+        repeat(3) { g.update(1f / 90f) }          // 1, 1 and 2 ticks: four in all
+        assertEquals(4 * Game.TICK, g.animTime, 1e-5f)
+        g.update(Game.TICK * 0.4f)                 // not a whole tick yet
+        assertEquals(4 * Game.TICK, g.animTime, 1e-5f)
+        g.update(Game.TICK * 0.7f)                 // now it is
+        assertEquals(5 * Game.TICK, g.animTime, 1e-5f)
+    }
 }
 
 class BossTest {
@@ -632,6 +661,12 @@ class HighScoresTest {
         val g = newGame()
         g.restoreHighScores(listOf(HighScore(100, 1), HighScore(300, 2), HighScore(200, 1), HighScore(50, 1), HighScore(400, 3), HighScore(10, 1)))
         assertEquals(listOf(400L, 300L, 200L, 100L, 50L), g.highScores.map { it.score })
+    }
+
+    @Test fun restoredTableIsSortedAndDeduplicated() {
+        val g = newGame()
+        g.restoreHighScores(listOf(HighScore(100, 1), HighScore(300, 2), HighScore(100, 1), HighScore(200, 1)))
+        assertEquals(listOf(300L, 200L, 100L), g.highScores.map { it.score })
     }
 
     @Test fun aRecordIsSavedOnGameOver() {
