@@ -232,10 +232,12 @@ level, reset the progress and listen as a screen reader.
 GitHub Actions runs on every push and pull request to `main`. The first
 three jobs gate the merge; the rest explore newer emulators and tooling and
 are marked `continue-on-error`, so a preview package that moves underneath
-us reports its findings without blocking a PR. Every emulator leg runs with
-full diagnostics (`-verbose -show-kernel -debug-metrics -metrics-collection`)
-on the lavapipe software Vulkan GPU or the emulator's auto choice, and posts
-a per-test summary to the run.
+us reports its findings without blocking a PR. The emulator-runner legs run
+with full diagnostics (`-verbose -show-kernel -debug-metrics -metrics-collection`)
+on the lavapipe software Vulkan GPU or the emulator's auto choice (plus one
+swiftshader comparison leg), and the build and instrumented jobs post a
+per-test summary to the run. The Android CLI legs boot through
+`android emulator start`, which takes no emulator flags.
 
 | Job | What it does | Gates |
 |-----|-------------|-------|
