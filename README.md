@@ -214,8 +214,11 @@ reversal and descent, the speed-up as the wave thins, the side margins),
 the invasion (even through a shield), collisions, the ship (strip, drag,
 keys, clamping, the lean), firing (strip, key, cooldown, the three-laser
 cap, despawn), kills and per-tier scoring (at a clamped worst-case frame
-too), bombs (cadence, cap, hits, invulnerability, shoot-down, the death
-frame), the saucer, the bonuses, progression (the clear bonus, level 9 into
+too), bombs (cadence, cap, hits, the opening grace, invulnerability and its
+end, the hit shake, shoot-down, the death frame, a fatal collision as the
+recorded cause, the tally reset by a new round), the saucer, the bonuses
+(clock restart on a repeat pickup, expiry, the bonus flash where it was
+caught), progression (the clear bonus, level 9 into
 10, the end screens, the title return), the mothership (drift, aimed bombs,
 the escort rule, the win), session restore, high scores, pause, the level
 pick, settings, the glasses touchbar, and the autopilot (firing, dodging,
