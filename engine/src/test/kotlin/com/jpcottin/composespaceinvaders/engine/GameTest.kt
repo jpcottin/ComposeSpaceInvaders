@@ -819,3 +819,118 @@ class SettingsTest {
         assertTrue(g.shotsFired > 0)
     }
 }
+
+class ShipHitTest {
+    /** A wave parked far above: no bomb of its own reaches the ship. */
+    private fun quiet(level: Int = 1) = playing(level).apply { debug.setFormation(y = -5f) }
+
+    @Test fun theRoundOpensWithAGracePeriod() {
+        val g = quiet()
+        assertTrue(g.invuln > 0f)
+        g.debug.spawnBomb(0f, 0.50f, 1f); g.run(0.2f)
+        assertEquals(3, g.lives)
+        g.run(1.2f)
+        assertTrue(g.invuln <= 0f)
+        g.debug.spawnBomb(0f, 0.50f, 1f); g.run(0.2f)
+        assertEquals(2, g.lives)
+    }
+
+    @Test fun invulnerabilityWearsOff() {
+        val g = quiet()
+        g.debug.clearInvuln()
+        g.debug.spawnBomb(0f, 0.50f, 1f); g.run(0.2f)
+        assertEquals(2, g.lives)
+        g.debug.spawnBomb(0f, 0.50f, 1f); g.run(0.2f)
+        assertEquals(2, g.lives)                       // still inside the window
+        g.run(1.3f)
+        g.debug.spawnBomb(0f, 0.50f, 1f); g.run(0.2f)
+        assertEquals(1, g.lives)                       // the window has closed
+    }
+
+    @Test fun aFatalCollisionIsRecordedAsTheCause() {
+        val g = playing()
+        g.debug.clearInvuln()
+        g.debug.setLives(1)
+        val col3 = g.aliens.first { it.row == 2 && it.col == 3 }
+        g.debug.setFormation(x = -g.alienX(col3), y = World.SHIP_Y - 2 * World.ROW_STEP)
+        g.debug.setShipX(0f)
+        g.update(FRAME)
+        assertEquals(Game.State.GAME_OVER, g.state)
+        assertEquals(0, g.lives)
+        assertEquals(Game.DeathCause.COLLISION, g.deathCause)
+    }
+
+    @Test fun aHitShakesTheScreenThenItSettles() {
+        val g = quiet()
+        g.debug.clearInvuln()
+        g.run(0.2f)
+        assertEquals(0f, g.shakeX, 1e-6f); assertEquals(0f, g.shakeY, 1e-6f)
+        g.debug.spawnBomb(0f, 0.50f, 1f)
+        assertTrue(g.runUntil(0.3f) { lives == 2 })
+        g.update(FRAME)
+        assertTrue(abs(g.shakeX) + abs(g.shakeY) > 0f)
+        g.run(2f)
+        assertEquals(0f, g.shakeX, 1e-6f); assertEquals(0f, g.shakeY, 1e-6f)
+    }
+
+    @Test fun aNewRoundResetsTheTally() {
+        val g = quiet()
+        g.setFire(true); g.run(0.5f); g.setFire(false)
+        assertTrue(g.shotsFired > 0)
+        g.debug.clearInvuln()
+        g.debug.setLives(1)
+        g.debug.activatePowerUp(Game.PowerUpType.RAPID)
+        g.debug.spawnBomb(0f, 0.50f, 1f); g.run(0.2f)
+        assertEquals(Game.State.GAME_OVER, g.state)
+        assertEquals(Game.DeathCause.BOMB, g.deathCause)
+        g.debug.startGame()
+        assertEquals(Game.State.PLAYING, g.state)
+        assertEquals(3, g.lives); assertEquals(0L, g.score)
+        assertEquals(0, g.shotsFired); assertEquals(0, g.lasersLost); assertEquals(0, g.bombsShot)
+        assertEquals(Game.DeathCause.NONE, g.deathCause)
+        assertEquals(-1, g.newHighScoreRank)
+        assertFalse(g.rapidActive)
+        assertTrue(g.lasers.isEmpty()); assertTrue(g.bombs.isEmpty())
+    }
+}
+
+class TimersTest {
+    private fun quiet(level: Int = 1) = playing(level).apply { debug.setFormation(y = -5f) }
+
+    @Test fun collectingTheSamePowerUpAgainRestartsItsClock() {
+        val g = quiet()
+        g.debug.activatePowerUp(Game.PowerUpType.RAPID)
+        g.run(World.POWER_UP_DURATION - 1f)
+        assertTrue(g.rapidActive)
+        g.debug.activatePowerUp(Game.PowerUpType.RAPID)
+        g.run(2f)
+        assertTrue(g.rapidActive)                      // would have expired a second in
+        g.run(World.POWER_UP_DURATION)
+        assertFalse(g.rapidActive)
+    }
+
+    @Test fun tripleShotWearsOff() {
+        val g = quiet()
+        g.debug.activatePowerUp(Game.PowerUpType.TRIPLE)
+        assertTrue(g.tripleActive)
+        g.run(World.POWER_UP_DURATION + FRAME)
+        assertFalse(g.tripleActive)
+        g.setFire(true); g.update(FRAME)
+        assertEquals(1, g.lasers.size)
+    }
+
+    @Test fun aCaughtBonusFlashesItsValueWhereItWasCaughtThenFades() {
+        val g = quiet(2)
+        g.run(0.2f)
+        assertEquals(0f, g.bonusFlashTimer, 1e-6f)
+        g.debug.spawnPowerUp(0f, 0.50f, Game.PowerUpType.SHIELD)
+        assertTrue(g.runUntil(1f) { powerUps.isEmpty() })
+        assertEquals(50L, g.score)                     // 25 times the level
+        assertEquals(50L, g.bonusFlash)
+        assertTrue(g.bonusFlashTimer > 0f)
+        assertEquals(0f, g.bonusFlashX, 1e-6f)
+        assertTrue(g.bonusFlashY > 0.3f && g.bonusFlashY < World.SHIP_Y)
+        g.run(Game.BONUS_FLASH_TIME + 2 * FRAME)
+        assertTrue(g.bonusFlashTimer <= 0f)
+    }
+}
