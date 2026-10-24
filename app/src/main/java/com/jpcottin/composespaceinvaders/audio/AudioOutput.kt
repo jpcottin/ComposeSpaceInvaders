@@ -80,7 +80,10 @@ class AudioOutput {
             .setTransferMode(AudioTrack.MODE_STREAM)
             .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
             .build()
-        check(track.state == AudioTrack.STATE_INITIALIZED) { "AudioTrack not initialized" }
+        if (track.state != AudioTrack.STATE_INITIALIZED) {
+            track.release()   // or the half-built track waits for the finalizer
+            error("AudioTrack not initialized")
+        }
         Log.i(TAG, "AudioTrack: $sampleRate Hz, buffer ${track.bufferSizeInFrames} frames")
         return track
     }
