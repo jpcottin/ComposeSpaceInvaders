@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -218,6 +219,8 @@ fun GameScreen(
             .background(background)
             .onSizeChanged { if (it.height > 0) game.setAspect(it.width.toFloat() / it.height) }
             .focusRequester(playfieldFocus)
+            // Focus leaving mid-hold (Up to the gear, a click elsewhere) takes the key-up with it.
+            .onFocusChanged { if (!it.isFocused) { game.setSteer(0); game.setFire(false) } }
             .focusable()
             .onKeyEvent { event ->
                 val steer = when (event.key) {
@@ -230,6 +233,7 @@ fun GameScreen(
                     // On the title, left and right pick the starting level.
                     steer != 0 && game.state == Game.State.TITLE -> {
                         if (first) game.selectLevel(steer)
+                        if (event.type == KeyEventType.KeyUp) game.setSteer(0)   // a key held since the last round
                         true
                     }
                     steer != 0 -> {

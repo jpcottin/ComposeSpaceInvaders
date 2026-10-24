@@ -23,6 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.jpcottin.composespaceinvaders.engine.Game
 import com.jpcottin.composespaceinvaders.engine.HighScore
+import com.jpcottin.composespaceinvaders.engine.World
 import com.jpcottin.composespaceinvaders.ui.GameViewModel
 import java.io.File
 import org.junit.After
@@ -350,4 +351,28 @@ class GameScreenTest {
         composeTestRule.onNodeWithContentDescription("Playfield")
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Level 1, 24 invaders left, 3 lives"))
     }
+
+    @Test
+    fun aSteerKeyReleasedOnTheTitleDoesNotSteerTheNextRound() {
+        val game = startARound()
+        val playfield = focusThePlayfield()
+        scenario.onActivity {
+            game.debug.setLives(1); game.debug.clearInvuln()
+            game.debug.spawnBomb(0f, World.SHIP_Y - 0.05f, 1f)
+        }
+        stepUntil(60) { game.state == Game.State.GAME_OVER }
+        assertEquals(Game.State.GAME_OVER, game.state)
+        playfield.performKeyInput { keyDown(Key.DirectionRight) }     // held through the end screen
+        frames(60)                                                    // past END_SCREEN_GRACE
+        playfield.performKeyInput { keyDown(Key.Spacebar); keyUp(Key.Spacebar) }   // back to the title
+        stepUntil(10) { game.state == Game.State.TITLE }
+        assertEquals(Game.State.TITLE, game.state)
+        playfield.performKeyInput { keyUp(Key.DirectionRight) }       // released on the title
+        playfield.performKeyInput { keyDown(Key.DirectionCenter); keyUp(Key.DirectionCenter) }
+        stepUntil(10) { game.state == Game.State.PLAYING }
+        assertEquals(Game.State.PLAYING, game.state)
+        frames(20)
+        assertEquals(0f, game.shipX, 1e-6f)                           // nothing is steering
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.jpcottin.composespaceinvaders.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -191,11 +192,13 @@ private fun SettingRow(
         modifier = Modifier
             .fillMaxWidth()
             .focusRing(interaction, shape)
-            .clickable(
+            // toggleable, not clickable: the row carries the on/off state a screen reader announces.
+            .toggleable(
+                value = checked,
                 interactionSource = interaction,
                 indication = null,
                 role = Role.Switch,
-                onClick = { onCheckedChange(!checked) },
+                onValueChange = onCheckedChange,
             )
             .padding(horizontal = 8.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,

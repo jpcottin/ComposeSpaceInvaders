@@ -6,7 +6,10 @@ import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.util.Log
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
+import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -35,7 +38,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore(
+    name = "settings",
+    // A file that cannot be parsed is replaced by an empty one instead of failing every write.
+    corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
+)
 
 /** The player's choices, persisted in DataStore. */
 data class Settings(
@@ -102,8 +109,12 @@ class GameViewModel(
         }
         // The round saved by a previous instance of this process, if any.
         savedState.get<Bundle>(KEY_SESSION)?.let { s ->
-            if (s.getBoolean(SESSION_MID_GAME))
+            if (s.getBoolean(SESSION_MID_GAME)) {
                 game.restoreSession(s.getInt(SESSION_LEVEL), s.getLong(SESSION_SCORE), s.getInt(SESSION_LIVES))
+                // The screen has been away for a while: a human gets the
+                // tap-to-resume, the autopilot resumes itself once its switch is read.
+                game.pause()
+            }
         }
         savedState.setSavedStateProvider(KEY_SESSION) {
             Bundle().apply {
@@ -117,6 +128,7 @@ class GameViewModel(
             val prefs = prefs.first()
             game.soundEnabled = prefs[KEY_SOUND] ?: true
             game.autoPlayActive = prefs[KEY_AUTO_PLAY] ?: false
+            game.resume()   // a restored round under the autopilot carries on now that the switch is known
             hapticsEnabled = prefs[KEY_HAPTICS] ?: true
             game.restoreHighScores(decodeScores(prefs[KEY_HIGH_SCORES]))
             // A restored session may already sit past the stored record.
@@ -131,14 +143,25 @@ class GameViewModel(
         }
     }
 
+    /** A write that must never take the process down: a failed disk loses a setting, not the game. */
+    private fun persist(block: suspend (MutablePreferences) -> Unit) {
+        viewModelScope.launch {
+            try {
+                store.edit { block(it) }
+            } catch (e: IOException) {
+                Log.w(TAG, "Settings write failed", e)
+            }
+        }
+    }
+
     fun setSoundEnabled(on: Boolean) {
         game.soundEnabled = on
-        viewModelScope.launch { store.edit { it[KEY_SOUND] = on } }
+        persist { it[KEY_SOUND] = on }
     }
 
     fun setAutoPlay(on: Boolean) {
         game.autoPlayActive = on
-        viewModelScope.launch { store.edit { it[KEY_AUTO_PLAY] = on } }
+        persist { it[KEY_AUTO_PLAY] = on }
     }
 
     /** Whether the vibrator speaks at all: the Haptics switch in Settings. */
@@ -146,7 +169,7 @@ class GameViewModel(
 
     fun setHaptics(on: Boolean) {
         hapticsEnabled = on
-        viewModelScope.launch { store.edit { it[KEY_HAPTICS] = on } }
+        persist { it[KEY_HAPTICS] = on }
     }
 
     /** Auto Play on and a round started: the game plays itself from here. */
@@ -159,7 +182,7 @@ class GameViewModel(
     fun resetProgress() {
         game.restoreHighScores(emptyList())
         game.furthestLevel = 1
-        viewModelScope.launch { store.edit { it.remove(KEY_HIGH_SCORES); it.remove(KEY_FURTHEST_LEVEL) } }
+        persist { it.remove(KEY_HIGH_SCORES); it.remove(KEY_FURTHEST_LEVEL) }
     }
 
     override fun onCleared() {
@@ -191,18 +214,16 @@ class GameViewModel(
     }
 
     override fun furthestLevelChanged(level: Int) {
-        viewModelScope.launch { store.edit { it[KEY_FURTHEST_LEVEL] = maxOf(it[KEY_FURTHEST_LEVEL] ?: 1, level) } }
+        persist { it[KEY_FURTHEST_LEVEL] = maxOf(it[KEY_FURTHEST_LEVEL] ?: 1, level) }
     }
 
     override fun highScoresChanged(table: List<HighScore>) {
         // The phone and the glasses instances share the store: fold the other
         // one's rows in rather than overwrite them.
-        viewModelScope.launch {
-            store.edit { prefs ->
-                val merged = (decodeScores(prefs[KEY_HIGH_SCORES]) + table)
-                    .distinct().sortedByDescending { it.score }.take(Game.MAX_SCORES)
-                prefs[KEY_HIGH_SCORES] = encodeScores(merged)
-            }
+        persist { prefs ->
+            val merged = (decodeScores(prefs[KEY_HIGH_SCORES]) + table)
+                .distinct().sortedByDescending { it.score }.take(Game.MAX_SCORES)
+            prefs[KEY_HIGH_SCORES] = encodeScores(merged)
         }
     }
 
@@ -212,13 +233,14 @@ class GameViewModel(
         private val KEY_HAPTICS = booleanPreferencesKey("haptics")
         private val KEY_HIGH_SCORES = stringPreferencesKey("high_scores")
         private val KEY_FURTHEST_LEVEL = intPreferencesKey("furthest_level")
-        private const val KEY_SESSION = "session"
+        private const val TAG = "GameViewModel"
+        internal const val KEY_SESSION = "session"
         /** Intent extra: start an Auto Play round as soon as the game is up. */
         const val EXTRA_AUTOPLAY = "autoplay"
-        private const val SESSION_MID_GAME = "midGame"
-        private const val SESSION_LEVEL = "level"
-        private const val SESSION_SCORE = "score"
-        private const val SESSION_LIVES = "lives"
+        internal const val SESSION_MID_GAME = "midGame"
+        internal const val SESSION_LEVEL = "level"
+        internal const val SESSION_SCORE = "score"
+        internal const val SESSION_LIVES = "lives"
 
         /** "score:level,score:level,..." — small enough that a string key is the simplest store. */
         internal fun encodeScores(table: List<HighScore>): String =
