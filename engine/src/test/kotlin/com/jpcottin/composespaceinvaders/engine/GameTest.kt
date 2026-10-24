@@ -648,6 +648,19 @@ class SessionTest {
         assertEquals(5, g.level); assertEquals(1234L, g.score); assertEquals(2, g.lives)
     }
 
+    @Test fun aSessionSavedInTheInterludeResumesAtTheNextLevel() {
+        val g = playing()
+        for (i in g.aliens.indices) g.debug.killAlien(i)
+        g.update(FRAME)
+        assertEquals(Game.State.LEVEL_CLEAR, g.state)
+        assertTrue(g.isMidGame)                          // worth saving...
+        assertEquals(1, g.level)                         // ...but not as the wave just cleared
+        assertEquals(2, g.resumeLevel)
+        g.run(2f)                                        // into level 2
+        assertEquals(Game.State.PLAYING, g.state)
+        assertEquals(2, g.resumeLevel)
+    }
+
     @Test fun outOfRangeSessionsAreRejected() {
         val g = newGame()
         g.restoreSession(11, 10L, 2); assertEquals(Game.State.TITLE, g.state)
