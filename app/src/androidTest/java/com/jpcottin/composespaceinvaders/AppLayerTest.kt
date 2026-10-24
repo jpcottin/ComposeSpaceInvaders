@@ -1,6 +1,15 @@
 package com.jpcottin.composespaceinvaders
 
 import android.os.Bundle
+import java.util.Locale
+import com.jpcottin.composespaceinvaders.ui.GameScreen
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.runtime.CompositionLocalProvider
+import android.os.LocaleList
+import android.content.res.Configuration
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.hasText
@@ -70,4 +79,20 @@ class AppLayerTest {
             scope.cancel()
         }
     }
+
+    @Test
+    fun aFrenchScreenReaderHearsFrenchLabels() {
+        val base = InstrumentationRegistry.getInstrumentation().targetContext
+        val config = Configuration(base.resources.configuration).apply { setLocales(LocaleList(Locale.FRENCH)) }
+        val french = base.createConfigurationContext(config)
+        val game = Game().apply { setAspect(411f / 891f) }
+        composeTestRule.setContent {
+            CompositionLocalProvider(LocalContext provides french, LocalConfiguration provides config, LocalResources provides french.resources) {
+                SpaceInvadersTheme { GameScreen(game, Settings(), onOpenSettings = {}, paused = true) }
+            }
+        }
+        composeTestRule.onNodeWithContentDescription(french.getString(R.string.a11y_playfield)).assertExists()
+        composeTestRule.onNodeWithContentDescription("Playfield").assertDoesNotExist()
+    }
+
 }

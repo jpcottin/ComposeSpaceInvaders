@@ -70,4 +70,11 @@
     <string name="a11y_game_over">Partie perdue, score %1$d</string>
     <string name="a11y_win">Partie gagnée, score %1$d</string>
     <string name="a11y_paused">Partie en pause</string>
+    <string name="a11y_playfield">Terrain de jeu</string>
+    <string name="a11y_control_surface">Surface de contrôle</string>
+    <string name="a11y_hud">Affichage tête haute</string>
+    <string name="a11y_start_level">Commencer au niveau %1$d</string>
+    <string name="a11y_mothership">Vaisseau-mère %1$d</string>
+    <string name="a11y_paused_overlay">En pause</string>
+    <string name="a11y_final_score">Score final %1$d</string>
 </resources>
