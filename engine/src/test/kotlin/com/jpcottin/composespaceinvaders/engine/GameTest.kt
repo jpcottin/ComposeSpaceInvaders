@@ -749,6 +749,25 @@ class PauseTest {
         assertFalse(g.paused)
     }
 
+    @Test fun aPauseDuringTheInterludeHoldsTheNextLevel() {
+        // Home during the second or two after a cleared wave: coming back must
+        // not land in a live level 2 that started on its own.
+        val g = playing()
+        for (i in g.aliens.indices) g.debug.killAlien(i)
+        g.update(FRAME)
+        assertEquals(Game.State.LEVEL_CLEAR, g.state)
+        g.pause()
+        assertTrue(g.paused)
+        g.run(3f)
+        assertEquals(Game.State.LEVEL_CLEAR, g.state)
+        assertTrue(g.paused)
+        g.tap(); g.update(FRAME)
+        assertFalse(g.paused)
+        g.run(3f)
+        assertEquals(Game.State.PLAYING, g.state)
+        assertEquals(2, g.level)
+    }
+
     @Test fun thereIsNothingToPauseOnTheTitleOrAnEndScreen() {
         val g = newGame()
         g.pause(); assertFalse(g.paused)
