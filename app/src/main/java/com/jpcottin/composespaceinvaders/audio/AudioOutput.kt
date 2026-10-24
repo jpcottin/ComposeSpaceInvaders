@@ -29,8 +29,9 @@ class AudioOutput {
     fun release() = lock.withLock { released = true; wake.signalAll() }
 
     private fun run() {
-        val track = try { open() } catch (e: Exception) { Log.w(TAG, "No audio output: $e"); return }
+        var track = try { open() } catch (e: Exception) { Log.w(TAG, "No audio output: $e"); return }
         val buf = FloatArray(BLOCK)
+        var reopens = 0
         try {
             while (!released) {
                 lock.withLock {
@@ -42,7 +43,17 @@ class AudioOutput {
                 if (released) break
                 if (track.playState != AudioTrack.PLAYSTATE_PLAYING) track.play()
                 synth.render(buf, BLOCK)
-                track.write(buf, 0, BLOCK, AudioTrack.WRITE_BLOCKING)
+                val written = track.write(buf, 0, BLOCK, AudioTrack.WRITE_BLOCKING)
+                if (written < 0) {
+                    // ERROR_DEAD_OBJECT after an audio server restart, or any other
+                    // failure: the track never recovers on its own, and writing to it
+                    // returns at once, so the loop would spin silently for good.
+                    Log.w(TAG, "AudioTrack write failed ($written); reopening")
+                    runCatching { track.stop() }
+                    track.release()
+                    if (++reopens > MAX_REOPENS) { Log.w(TAG, "Giving up on audio output"); return }
+                    track = try { open() } catch (e: Exception) { Log.w(TAG, "No audio output: $e"); return }
+                }
             }
         } finally {
             runCatching { track.stop() }
@@ -78,5 +89,6 @@ class AudioOutput {
         private const val TAG = "AudioOutput"
         /** Frames per render: about 5 ms at 48 kHz. */
         private const val BLOCK = 256
+        private const val MAX_REOPENS = 3
     }
 }
