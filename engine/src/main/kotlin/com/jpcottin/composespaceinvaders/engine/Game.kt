@@ -653,10 +653,12 @@ class Game(private val host: GameHost = GameHost.None) {
         tapPending = false
 
         // A paused round waits for a tap; the clock above keeps the overlay
-        // breathing. A key does not resume it; the autopilot does.
+        // breathing. A key does not resume it, and neither does the autopilot:
+        // a pause the player asked for (Back, P, Escape) holds until the tap.
+        // The screen coming back is resume()'s business.
         if (paused) {
             if (state != State.PLAYING) paused = false
-            else if (tapped || (autoPlayActive && aiMove)) { paused = false; syncSiren() }
+            else if (tapped) { paused = false; syncSiren() }
             else return
         }
 

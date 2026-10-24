@@ -99,6 +99,9 @@ fun GameScreen(viewModel: GameViewModel) {
         glasses = onGlasses,
     )
     if (showSettings) {
+        // Closing the sheet is the screen coming back: a human gets the tap
+        // to resume, the autopilot carries on.
+        val closeSettings = { showSettings = false; viewModel.game.resume() }
         val glassesState = when {
             glassesActive -> GlassesState.ACTIVE
             glassesConnected -> GlassesState.CONNECTED
@@ -107,7 +110,7 @@ fun GameScreen(viewModel: GameViewModel) {
         val onGlassesToggle = {
             if (glassesActive) GlassesSession.bringBack()
             else if (activity != null) GlassesSession.launch(activity)
-            showSettings = false
+            closeSettings()
         }
         // A phone gets a sheet sliding up from the thumb; a wide window (a
         // tablet, a TV, an XR panel) a card in the middle of the screen.
@@ -119,7 +122,7 @@ fun GameScreen(viewModel: GameViewModel) {
             onAutoPlayChange = viewModel::setAutoPlay,
             onHapticsChange = viewModel::setHaptics,
             onResetProgress = viewModel::resetProgress,
-            onDismiss = { showSettings = false },
+            onDismiss = closeSettings,
             glasses = glassesState,
             onGlassesToggle = onGlassesToggle,
         ) else SettingsSheet(
@@ -128,7 +131,7 @@ fun GameScreen(viewModel: GameViewModel) {
             onAutoPlayChange = viewModel::setAutoPlay,
             onHapticsChange = viewModel::setHaptics,
             onResetProgress = viewModel::resetProgress,
-            onDismiss = { showSettings = false },
+            onDismiss = closeSettings,
             glasses = glassesState,
             onGlassesToggle = onGlassesToggle,
         )
@@ -248,7 +251,9 @@ fun GameScreen(
                         }
                         true
                     }
-                    event.key == Key.DirectionUp && event.type == KeyEventType.KeyDown -> {
+                    // The gear exists on the phone only; on the glasses there is
+                    // nothing above the battlefield to move focus to.
+                    !glasses && event.key == Key.DirectionUp && event.type == KeyEventType.KeyDown -> {
                         gearFocus.requestFocus(); true
                     }
                     // P, Escape and a remote's play/pause button freeze a
