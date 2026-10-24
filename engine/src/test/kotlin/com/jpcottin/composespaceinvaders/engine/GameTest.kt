@@ -1,6 +1,7 @@
 package com.jpcottin.composespaceinvaders.engine
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -59,6 +60,14 @@ class MarchTest {
         val y0 = g.formationY
         assertTrue(g.runUntil(30f) { marchDir < 0 })
         assertEquals(y0 + World.DESCEND, g.formationY, 1e-5f)
+    }
+
+    @Test fun aWaveWiderThanTheViewStillCrossesBeforeItDescends() {
+        val g = playing(aspect = 0.32f)        // a 320 dp-wide, tall free-form window
+        val y0 = g.formationY
+        g.run(1f)
+        assertEquals(Game.State.PLAYING, g.state)
+        assertTrue("descended ${g.formationY - y0}", g.formationY - y0 <= 2 * World.DESCEND + 1e-5f)
     }
 
     @Test fun theWaveStaysWithinTheSideMargins() {
@@ -497,6 +506,30 @@ class ProgressionTest {
         assertTrue(g.bombs.isEmpty())
     }
 
+    @Test fun aLevelClearKeepsTheBonusesFalling() {
+        val g = playing()
+        g.debug.spawnPowerUp(0.2f, 0f, Game.PowerUpType.RAPID)
+        for (i in g.aliens.indices) g.debug.killAlien(i)
+        g.update(FRAME)
+        assertEquals(Game.State.LEVEL_CLEAR, g.state)
+        val y0 = g.powerUps.single().y
+        g.run(0.5f)
+        assertEquals(Game.State.LEVEL_CLEAR, g.state)
+        assertNotEquals(y0, g.powerUps.single().y)
+    }
+
+    @Test fun anActiveBonusKeepsTickingThroughTheInterlude() {
+        val g = playing()
+        g.debug.spawnPowerUp(g.shipX, World.SHIP_Y, Game.PowerUpType.RAPID)
+        g.update(FRAME)
+        assertTrue(g.rapidTimer > 0f)
+        val t0 = g.rapidTimer
+        for (i in g.aliens.indices) g.debug.killAlien(i)
+        g.update(FRAME); g.run(0.5f)
+        assertEquals(Game.State.LEVEL_CLEAR, g.state)
+        assertTrue(g.rapidTimer < t0 - 0.4f)
+    }
+
     @Test fun clearingLevelNineBringsTheMothership() {
         val g = playing(9)
         for (i in g.aliens.indices) g.debug.killAlien(i)
@@ -646,6 +679,14 @@ class SessionTest {
         g.restoreSession(5, 1234L, 2)
         assertEquals(Game.State.PLAYING, g.state)
         assertEquals(5, g.level); assertEquals(1234L, g.score); assertEquals(2, g.lives)
+    }
+
+    @Test fun aSessionResumesAtLevelOneWhateverTheTitlePick() {
+        val g = newGame()
+        g.furthestLevel = 5; g.selectLevel(4)
+        g.restoreSession(1, 10L, 2)
+        assertEquals(1, g.level)
+        assertEquals(10L, g.score); assertEquals(2, g.lives)
     }
 
     @Test fun aSessionSavedInTheInterludeResumesAtTheNextLevel() {

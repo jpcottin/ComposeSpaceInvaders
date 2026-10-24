@@ -21,6 +21,10 @@ object World {
     const val ALIEN_HH = 0.030f     // invader half-height
     const val DESCEND = 0.040f      // drop per edge bounce
     const val SIDE_MARGIN = 0.015f  // the wave reverses when its outermost invader gets this close to the side
+    /** The wave marches as if the view were at least this wide, so a crossing is never
+     *  zero-length: in a window narrower than the wave it overhangs the sides a little
+     *  instead of bouncing (and descending) on every tick. */
+    const val MIN_MARCH_ASPECT = 0.40f
     /** The last survivor of a wave marches this many times faster than a full one. */
     const val THIN_WAVE_SPEEDUP = 3.5f
     /** The invasion succeeds (instant game over) once an invader's bottom edge
