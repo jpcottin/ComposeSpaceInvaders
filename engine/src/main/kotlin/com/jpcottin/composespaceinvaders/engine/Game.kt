@@ -284,6 +284,10 @@ class Game(private val host: GameHost = GameHost.None) {
         clampShip()
     }
 
+    /** The width the wave marches against: the view, but never narrower than
+     *  [World.MIN_MARCH_ASPECT] (see there). */
+    private val marchAspect: Float get() = maxOf(aspect, World.MIN_MARCH_ASPECT)
+
     /** Randomize the xorshift state (production only — tests rely on the fixed
      *  default seed for deterministic choreography). */
     fun seed(seed: Int) {
@@ -320,7 +324,7 @@ class Game(private val host: GameHost = GameHost.None) {
     fun restoreSession(level: Int, score: Long, lives: Int) {
         if (level !in 1..Levels.COUNT || lives !in 1..START_LIVES || score < 0) return
         startGame()
-        if (level > 1) startLevel(level)
+        if (level != this.level) startLevel(level)
         this.score = score
         this.lives = lives
     }
@@ -700,6 +704,10 @@ class Game(private val host: GameHost = GameHost.None) {
                 // The boss level never enters LEVEL_CLEAR: it ends only by
                 // killing the mothership, which jumps straight to WIN.
                 stateTimer += dt
+                // A bonus dropped by the last kill keeps falling (and can still
+                // be caught) instead of hanging frozen through the interlude,
+                // and the active bonus timers keep running.
+                updatePowerUps(dt)
                 if (stateTimer >= LEVEL_CLEAR_PAUSE) startLevel(level + 1)
             }
             State.GAME_OVER, State.WIN -> {
@@ -772,10 +780,11 @@ class Game(private val host: GameHost = GameHost.None) {
             if (x < minX) minX = x
             if (x > maxX) maxX = x
         }
-        if (marchDir > 0 && maxX + World.ALIEN_HW >= aspect - World.SIDE_MARGIN) {
+        val edge = marchAspect - World.SIDE_MARGIN
+        if (marchDir > 0 && maxX + World.ALIEN_HW >= edge) {
             marchDir = -1
             formationY += World.DESCEND
-        } else if (marchDir < 0 && minX - World.ALIEN_HW <= -aspect + World.SIDE_MARGIN) {
+        } else if (marchDir < 0 && minX - World.ALIEN_HW <= -edge) {
             marchDir = 1
             formationY += World.DESCEND
         }
@@ -1094,7 +1103,7 @@ class Game(private val host: GameHost = GameHost.None) {
         fun colX(c: Int) = formationX + (c - (World.COLS - 1) * 0.5f) * World.COL_STEP
         // The wave reverses when its outermost alive invader reaches a side
         // margin, so a lead can't run past the bounce point — it folds back.
-        val edgeX = aspect - World.SIDE_MARGIN - World.ALIEN_HW
+        val edgeX = marchAspect - World.SIDE_MARGIN - World.ALIEN_HW
         val distToBounce = (if (marchDir > 0) edgeX - colX(colMax) else colX(colMin) + edgeX).coerceAtLeast(0f)
         val v = marchSpeed
         // Where column c will be `t` seconds from now.
