@@ -721,6 +721,21 @@ class PauseTest {
         assertFalse(g.paused)
     }
 
+    @Test fun aPauseThePlayerAskedForHoldsTheAutopilotUntilATap() {
+        // Back (or P) during an Auto Play round: the autopilot must not
+        // unfreeze the round on the next tick, or Back could never leave.
+        val g = playing()
+        g.autoPlayActive = true
+        g.run(0.5f)
+        g.pause()
+        val x = g.formationX
+        g.run(0.5f)
+        assertTrue(g.paused)
+        assertEquals(x, g.formationX, 1e-6f)
+        g.tap(); g.update(FRAME)
+        assertFalse(g.paused)
+    }
+
     @Test fun thereIsNothingToPauseOnTheTitleOrAnEndScreen() {
         val g = newGame()
         g.pause(); assertFalse(g.paused)

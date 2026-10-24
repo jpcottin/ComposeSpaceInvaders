@@ -79,7 +79,8 @@ The other screens, as the screenshot tests render them:
   Settings forgets the record along with the high scores.
 - **Pause:** a round freezes when the screen goes away, when Settings opens,
   on Back, and on P, Escape or a remote's play/pause button. A tap, OK or the
-  same key resumes; the autopilot resumes itself.
+  same key resumes. When the screen itself went away and comes back, the
+  autopilot carries on by itself; a pause the player asked for holds until the tap.
 - **High scores:** a table of five, persisted; gold, silver and bronze on the
   title, the rank on the end screen when a record falls.
 - **Sound:** every effect synthesised in real time: the laser sweep, the
