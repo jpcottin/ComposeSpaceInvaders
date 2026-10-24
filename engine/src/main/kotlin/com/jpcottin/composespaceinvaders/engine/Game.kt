@@ -334,9 +334,11 @@ class Game(private val host: GameHost = GameHost.None) {
     val resumeLevel: Int get() = if (state == State.LEVEL_CLEAR) level + 1 else level
 
     /** The screen is going away or something covers it: freeze a round in
-     *  flight. Nothing to freeze on the title or an end screen. */
+     *  flight, including the interlude after a cleared wave (or the next
+     *  level would start, bombs and all, while nobody is looking). Nothing
+     *  to freeze on the title or an end screen. */
     fun pause() {
-        if (state == State.PLAYING) { paused = true; syncSiren() }
+        if (state == State.PLAYING || state == State.LEVEL_CLEAR) { paused = true; syncSiren() }
     }
 
     /** The screen is back. A human gets a "tap to resume" moment; the
@@ -662,7 +664,7 @@ class Game(private val host: GameHost = GameHost.None) {
         // a pause the player asked for (Back, P, Escape) holds until the tap.
         // The screen coming back is resume()'s business.
         if (paused) {
-            if (state != State.PLAYING) paused = false
+            if (state != State.PLAYING && state != State.LEVEL_CLEAR) paused = false
             else if (tapped) { paused = false; syncSiren() }
             else return
         }
