@@ -63,8 +63,8 @@ The other screens, as the screenshot tests render them:
   speed scale with the level.
 - **Mystery saucer:** crosses the top of the screen with a warbling siren,
   100 pts times the level, with the bonus value flashed where it died.
-- **Bonuses:** one kill in twelve drops one: shield (absorbs one hit, lasts
-  until hit), rapid fire (halved cooldown, 8 s with a timer bar), triple shot
+- **Bonuses:** about one kill in twelve drops one: shield (absorbs one hit, lasts
+  until hit), rapid fire (the 0.42 s cooldown cut to 0.20 s, 8 s with a timer bar), triple shot
   (a three-laser volley, centre plus ±8°, 8 s). +25 pts times the level on
   pickup.
 - **Lives:** 3. Lose one to a bomb or an invader collision (the invader is
