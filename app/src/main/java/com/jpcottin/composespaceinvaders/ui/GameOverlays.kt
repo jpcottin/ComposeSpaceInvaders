@@ -208,11 +208,12 @@ internal fun TitleOverlay(game: Game, frame: LongState, farViewing: Boolean, hin
                         enabled = game.startLevel > 1,
                         modifier = Modifier.semantics { contentDescription = previous },
                     ) { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, contentDescription = null, tint = ShipCyan) }
+                    val startLevelLabel = stringResource(R.string.a11y_start_level, game.startLevel)
                     Text(
                         text = stringResource(R.string.start_level, game.startLevel),
                         style = MaterialTheme.typography.titleMedium.scaled(textScale),
                         color = ShipCyan,
-                        modifier = Modifier.padding(horizontal = 8.dp).semantics { contentDescription = "Start level ${game.startLevel}" },
+                        modifier = Modifier.padding(horizontal = 8.dp).semantics { contentDescription = startLevelLabel },
                     )
                     if (arrows) IconButton(
                         onClick = { game.selectLevel(1) },
@@ -253,13 +254,14 @@ private fun MiniShip(color: Color, size: androidx.compose.ui.unit.Dp) {
 @Composable
 internal fun Hud(game: Game, frame: LongState, chromePadding: androidx.compose.ui.unit.Dp, textScale: Float, autoPlay: Boolean) {
     observe(frame)
+    val hudLabel = stringResource(R.string.a11y_hud)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.safeDrawing)
             .padding(horizontal = chromePadding, vertical = 6.dp)
             .padding(end = 48.dp)   // the gear's column
-            .semantics { contentDescription = "HUD" },
+            .semantics { contentDescription = hudLabel },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val scoreLabel = stringResource(R.string.hud_score)
@@ -296,11 +298,12 @@ internal fun Hud(game: Game, frame: LongState, chromePadding: androidx.compose.u
     // The mothership's name under her health bar, below her flight path.
     val boss = game.boss
     if (boss != null && boss.alive) {
+        val mothershipLabel = stringResource(R.string.a11y_mothership, boss.hp)
         Text(
             text = stringResource(R.string.mothership),
             style = MaterialTheme.typography.labelLarge.scaled(textScale),
             color = BossMagenta,
-            modifier = Modifier.atWorld(0f, -0.62f).semantics { contentDescription = "Mothership ${boss.hp}" },
+            modifier = Modifier.atWorld(0f, -0.62f).semantics { contentDescription = mothershipLabel },
         )
     }
 }
@@ -311,11 +314,12 @@ internal fun PausedOverlay(game: Game, frame: LongState, hint: InputHint, textSc
     observe(frame)
     val pulse = 0.5f + 0.5f * sin(game.animTime * 4f)
     Box(Modifier.fillMaxSize().background(Color(0x66060812))) {
+        val pausedLabel = stringResource(R.string.a11y_paused_overlay)
         Text(
             text = stringResource(R.string.paused),
             style = MaterialTheme.typography.displayMedium.scaled(textScale),
             color = ShipCyan,
-            modifier = Modifier.atWorld(0f, -0.05f).semantics { contentDescription = "Paused" },
+            modifier = Modifier.atWorld(0f, -0.05f).semantics { contentDescription = pausedLabel },
         )
         Text(
             text = stringResource(
@@ -374,12 +378,13 @@ internal fun EndScreen(game: Game, frame: LongState, title: String, tint: Color,
             }
         }
         val scoreColor = if (game.newHighScore) TitleGold.copy(alpha = 0.8f + 0.2f * pulse) else Color.White
+        val finalScoreLabel = stringResource(R.string.a11y_final_score, game.score)
         Text(
             text = "%,d".format(game.score),
             style = MaterialTheme.typography.displayLarge.copy(fontSize = 64.sp * textScale),
             color = scoreColor,
             maxLines = 1,
-            modifier = Modifier.atWorld(0f, -0.05f).semantics { contentDescription = "Final score ${game.score}" },
+            modifier = Modifier.atWorld(0f, -0.05f).semantics { contentDescription = finalScoreLabel },
         )
         Text(
             text = title,

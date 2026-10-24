@@ -163,6 +163,7 @@ fun GameScreen(
     // tells Compose a step happened. Everything that shows engine state
     // reads it (see [observe]) and so recomposes or redraws once per step.
     val frame = remember { mutableLongStateOf(0L) }
+    val playfieldLabel = stringResource(R.string.a11y_playfield)
 
     // The frame loop: one engine step per vsync, with the real elapsed time.
     LaunchedEffect(paused) {
@@ -184,9 +185,11 @@ fun GameScreen(
     // upper half is the battlefield) squeezes them together: smaller text.
     val density = LocalDensity.current
     val windowHeightDp = LocalWindowInfo.current.containerSize.height / density.density
+    // In the tabletop posture the battlefield is the upper half of the window.
+    val fieldHeightDp = if (tabletop) windowHeightDp / 2f else windowHeightDp
     val textScale = when {
         farViewing -> 1.5f
-        windowHeightDp in 1f..SHORT_WINDOW_DP -> 0.7f
+        fieldHeightDp in 1f..SHORT_WINDOW_DP -> 0.7f
         else -> 1f
     }
 
@@ -294,7 +297,7 @@ fun GameScreen(
                 }
             }
             .semantics {
-                contentDescription = "Playfield"
+                contentDescription = playfieldLabel
                 stateDescription = fieldState
             },
     ) {
@@ -366,6 +369,7 @@ fun GameScreen(
 private fun ControlSurface(game: Game, frame: LongState, modifier: Modifier = Modifier) {
     observe(frame)
     val held = game.moveHeld
+    val controlSurfaceLabel = stringResource(R.string.a11y_control_surface)
     Box(
         modifier = modifier
             .background(MaterialTheme.colorScheme.surface)
@@ -390,7 +394,7 @@ private fun ControlSurface(game: Game, frame: LongState, modifier: Modifier = Mo
                     }
                 }
             }
-            .semantics { contentDescription = "Control surface" },
+            .semantics { contentDescription = controlSurfaceLabel },
     ) {
         Canvas(Modifier.fillMaxSize()) {
             // The steering marker, under the ship: where the finger acts.
