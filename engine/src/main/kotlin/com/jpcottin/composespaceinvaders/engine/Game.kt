@@ -342,6 +342,11 @@ class Game(private val host: GameHost = GameHost.None) {
      *  level would start, bombs and all, while nobody is looking). Nothing
      *  to freeze on the title or an end screen. */
     fun pause() {
+        // A key held as the screen goes away is released somewhere else (a
+        // settings sheet, another app), never here: forget it, or the ship
+        // would slide to the edge and fire on its own once the screen is back.
+        steer = 0
+        fireKey = false
         if (state == State.PLAYING || state == State.LEVEL_CLEAR) { paused = true; syncSiren() }
     }
 

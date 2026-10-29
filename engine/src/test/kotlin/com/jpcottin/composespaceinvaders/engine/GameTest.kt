@@ -817,6 +817,30 @@ class PauseTest {
         h.pause(); assertFalse(h.paused)
     }
 
+    @Test fun aPauseLetsGoOfHeldKeys() {
+        // The keys' release lands wherever the focus went (a settings sheet,
+        // another app): the engine would otherwise keep them down for good.
+        val g = playing()
+        g.setSteer(1); g.setFire(true)
+        assertTrue(g.moveHeld); assertTrue(g.fireHeld)
+        g.pause()
+        assertFalse(g.moveHeld); assertFalse(g.fireHeld)
+        g.tap(); g.update(FRAME)
+        assertFalse(g.paused)
+        g.run(1f)
+        assertEquals(0f, g.shipX, 1e-6f)              // nothing steers
+        assertTrue(g.lasers.none { it.alive })        // nothing fires
+    }
+
+    @Test fun anEndScreenLetsGoOfHeldKeysToo() {
+        val h = playing()
+        h.debug.setFormation(y = World.INVADE_Y); h.update(FRAME)
+        h.setSteer(-1); h.setFire(true)
+        h.pause()                                     // nothing to freeze, but the keys are gone
+        assertFalse(h.paused)
+        assertFalse(h.moveHeld); assertFalse(h.fireHeld)
+    }
+
     @Test fun theSirenStopsWhilePaused() {
         val host = RecordingHost()
         val g = playing(host = host)

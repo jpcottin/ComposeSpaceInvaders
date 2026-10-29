@@ -240,6 +240,42 @@ class GameScreenTest {
     }
 
     @Test
+    fun theGearLetsGoOfASteeringKey() {
+        val game = startARound()
+        val playfield = focusThePlayfield()
+        playfield.performKeyInput { keyDown(Key.DirectionRight) }
+        frames(2)
+        assertTrue("the key should steer", game.moveHeld)
+        // The sheet takes the focus with it: the key's release lands there,
+        // never on the playfield.
+        composeTestRule.onNodeWithContentDescription("Settings").performClick()
+        frames(2)
+        assertTrue(game.paused)
+        assertFalse("a key held when the sheet opened must not steer on", game.moveHeld)
+        runCatching { playfield.performKeyInput { keyUp(Key.DirectionRight) } }
+    }
+
+    @Test
+    fun leavingTheScreenLetsGoOfTheFireKey() {
+        var multiWindow = false
+        scenario.onActivity { multiWindow = it.isInMultiWindowMode }
+        assumeFalse("free-form windows stay resumed", multiWindow)
+        val game = startARound()
+        val playfield = focusThePlayfield()
+        playfield.performKeyInput { keyDown(Key.Spacebar) }
+        frames(2)
+        assertTrue("the key should hold the trigger", game.fireHeld)
+        // Another app comes to the front: the key is released over there.
+        scenario.moveToState(Lifecycle.State.STARTED)
+        frames(2)
+        assertTrue(game.paused)
+        assertFalse("a key held when the screen went away must not fire on", game.fireHeld)
+        scenario.moveToState(Lifecycle.State.RESUMED)
+        frames(2)
+        runCatching { playfield.performKeyInput { keyUp(Key.Spacebar) } }
+    }
+
+    @Test
     fun escapeFreezesTheRoundAndFreesItAgain() {
         val game = startARound()
         val playfield = focusThePlayfield()
