@@ -82,7 +82,7 @@ The other screens, as the screenshot tests render them:
   same key resumes. When the screen itself went away and comes back, the
   autopilot carries on by itself; a pause the player asked for holds until the tap.
 - **High scores:** a table of five, persisted; gold, silver and bronze on the
-  title, the rank on the end screen when a record falls.
+  title, and the end screen names the rank of any new entry, podium or not.
 - **Sound:** every effect synthesised in real time: the laser sweep, the
   explosions, the hit, the level-clear arpeggio, the pickup sparkle, the
   saucer siren, the four-note march bass and an ambient A-minor bed. No
@@ -229,7 +229,8 @@ mothership, pause, level clear, game over and win on a phone, a foldable
 (open and half-opened), a tablet, a TV and the glasses, plus the ten waves
 and the settings screens. The instrumented tests launch the real activity
 and drive it by tap, D-pad and keyboard, pause it from every path, pick a
-level, reset the progress and listen as a screen reader.
+level, reset the progress, end a round on a new high score below the podium
+and listen as a screen reader.
 
 ## CI/CD
 
@@ -247,7 +248,7 @@ per-test summary to the run. The Android CLI legs boot through
 |-----|-------------|-------|
 | **Build, lint, tests, screenshots** | Engine JUnit tests, Android lint, app unit tests, Compose preview screenshot validation, the debug and the minified release APK (`apks` artifact) | yes |
 | **Auto Play bench** | Seeded campaigns with the autopilot on a portrait phone (100), a landscape screen (50) and a foldable's inner screen (50); fails under a 95% campaign win rate | yes |
-| **Instrumented** | The instrumented tests (title, a round by tap, D-pad and keyboard, pause from every path, a key held through a pause, the level pick, the settings sheet, a screen reader) on emulators: phones at API 33, 34, 35 and 36, a foldable and a TV at API 36, with `-delay-adb` so a device going offline mid-boot cannot fail a leg. The TV leg boots its emulator itself (`.github/scripts/boot-emulator.sh`): that image restarts adbd right after boot and the runner action's first key press used to meet it | yes |
+| **Instrumented** | The instrumented tests (title, a round by tap, D-pad and keyboard, pause from every path, a key held through a pause, the level pick, the settings sheet, a new high score below the podium, a screen reader) on emulators: phones at API 33, 34, 35 and 36, a foldable and a TV at API 36, with `-delay-adb` so a device going offline mid-boot cannot fail a leg. The TV leg boots its emulator itself (`.github/scripts/boot-emulator.sh`): that image restarts adbd right after boot and the runner action's first key press used to meet it | yes |
 | **Instrumented, experimental** | The same tests on an XR headset (API 34, `google-xr`), on a swiftshader comparison leg, and on the API 37.0, 37.1 and 37.2 page-size-16k images with the stable and canary emulators, lavapipe and auto GPU | no |
 | **Android CLI experiment** | The whole emulator flow through the Android CLI (`android sdk install`, `android emulator create/start/stop`) on the canary emulator, API 37.0 and 37.2 | no |
 | **Emulator Preview experiment** | The `emulators;latest` preview package launched by its own binary, API 37.0, 37.1 and 37.2 | no |
