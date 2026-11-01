@@ -389,6 +389,22 @@ class GameScreenTest {
     }
 
     @Test
+    fun aScoreBelowThePodiumIsStillNamedANewHighScore() {
+        val game = startARound()
+        scenario.onActivity {
+            game.restoreHighScores(listOf(HighScore(3000, 3), HighScore(2000, 2), HighScore(1000, 1)))
+            game.debug.setScore(500); game.debug.setLives(1); game.debug.clearInvuln()
+            game.debug.spawnBomb(0f, World.SHIP_Y - 0.05f, 1f)
+        }
+        stepUntil(60) { game.state == Game.State.GAME_OVER }
+        assertEquals(Game.State.GAME_OVER, game.state)
+        assertEquals(3, game.newHighScoreRank)                        // fourth place, under the podium
+        frames(2)
+        composeTestRule.onNodeWithText("#4").assertIsDisplayed()
+        composeTestRule.onNodeWithText("NEW HIGH SCORE").assertIsDisplayed()
+    }
+
+    @Test
     fun aSteerKeyReleasedOnTheTitleDoesNotSteerTheNextRound() {
         val game = startARound()
         val playfield = focusThePlayfield()
