@@ -213,7 +213,7 @@ ANDROID_SERIAL=emulator-5554 ./gradlew :app:connectedDebugAndroidTest   # on one
 The engine tests cover the formation (rows per level, the march, edge
 reversal and descent, the speed-up as the wave thins, the side margins),
 the invasion (even through a shield), collisions, the ship (strip, drag,
-keys, clamping, the lean), firing (strip, key, cooldown, the three-laser
+keys, clamping, a window narrower than the ship, the lean), firing (strip, key, cooldown, the three-laser
 cap, despawn), kills and per-tier scoring (at a clamped worst-case frame
 too), bombs (cadence, cap, hits, the opening grace, invulnerability and its
 end, the hit shake, shoot-down, the death frame, a fatal collision as the
