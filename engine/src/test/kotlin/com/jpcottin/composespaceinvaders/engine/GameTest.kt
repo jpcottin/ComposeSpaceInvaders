@@ -203,6 +203,30 @@ class ShipControlTest {
     }
 }
 
+class NarrowWindowTest {
+    // Narrower than the ship itself: the usual clamp range would be inverted.
+    private val SLIVER = World.SHIP_SCALE * 0.75f
+
+    @Test fun aWindowNarrowerThanTheShipKeepsItCentredInsteadOfThrowing() {
+        val g = playing(aspect = SLIVER)
+        g.setSteer(1)
+        g.run(0.5f)                                  // steering and clamping every tick
+        assertEquals(0f, g.shipX, 1e-6f)
+        g.setSteer(0)
+        g.touchStrip(0.3f)
+        g.run(0.5f)
+        assertEquals(0f, g.shipX, 1e-6f)
+    }
+
+    @Test fun theAutopilotPlaysAWindowNarrowerThanTheShipWithoutThrowing() {
+        val g = playing(aspect = SLIVER)
+        g.autoPlayActive = true
+        g.run(3f)                                    // bombs fall, the pilot dodges and hunts
+        assertEquals(0f, g.shipX, 1e-6f)
+        assertNotEquals(Game.State.TITLE, g.state)
+    }
+}
+
 class FiringTest {
     @Test fun aFingerOnTheStripFires() {
         val g = playing()

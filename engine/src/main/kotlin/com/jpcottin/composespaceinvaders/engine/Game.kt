@@ -288,6 +288,11 @@ class Game(private val host: GameHost = GameHost.None) {
      *  [World.MIN_MARCH_ASPECT] (see there). */
     private val marchAspect: Float get() = maxOf(aspect, World.MIN_MARCH_ASPECT)
 
+    /** How far from the centre the ship may go. A window narrower than the
+     *  ship (an absurd aspect, but a window nonetheless) pins it to the
+     *  centre instead of handing an inverted range to the clamps. */
+    private val shipLimit: Float get() = (aspect - World.SHIP_SCALE).coerceAtLeast(0f)
+
     /** Randomize the xorshift state (production only — tests rely on the fixed
      *  default seed for deterministic choreography). */
     fun seed(seed: Int) {
@@ -408,7 +413,7 @@ class Game(private val host: GameHost = GameHost.None) {
         get() = fireKey || pointers.any { inControlZone(it) } || (autoPlayActive && aiFire)
 
     private fun controlTargetX(): Float {
-        if (steer != 0) return steer * (aspect - World.SHIP_SCALE)   // the screen's edge, that way
+        if (steer != 0) return steer * shipLimit   // the screen's edge, that way
         return pointers.firstOrNull { inControlZone(it) }?.x ?: aiTargetX
     }
 
@@ -747,8 +752,7 @@ class Game(private val host: GameHost = GameHost.None) {
     }
 
     private fun clampShip() {
-        val lim = aspect - World.SHIP_SCALE
-        shipX = shipX.coerceIn(-lim, lim)
+        shipX = shipX.coerceIn(-shipLimit, shipLimit)
     }
 
     private fun updateShip(dt: Float) {
@@ -1218,7 +1222,7 @@ class Game(private val host: GameHost = GameHost.None) {
         val alignThresh = if (tripleActive) 0.10f else 0.030f
         val horizon = 0.9f   // seconds of bomb look-ahead
         val radius = 0.11f   // an impact this close to x counts as a hit
-        val lim = aspect - World.SHIP_SCALE
+        val lim = shipLimit
 
         // 1) Threat model: how much incoming fire lands near x within the
         //    horizon, urgency-weighted (boss bombs drift sideways — predict
