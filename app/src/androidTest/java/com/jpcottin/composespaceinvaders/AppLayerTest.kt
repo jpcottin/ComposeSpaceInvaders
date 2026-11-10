@@ -10,7 +10,14 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.runtime.CompositionLocalProvider
 import android.os.LocaleList
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
@@ -54,6 +61,17 @@ class AppLayerTest {
         composeTestRule.onNode(hasText("Sound") and isToggleable()).assertIsOn()
         composeTestRule.onNode(hasText("Haptics") and isToggleable()).assertIsOff()
         composeTestRule.onNode(hasText("Auto Play") and isToggleable()).assertIsOn()
+    }
+
+    @Test
+    fun doneIsReachableOnAShortWindow() {
+        // A phone in landscape, or a large font, leaves less room than the rows need.
+        composeTestRule.setContent {
+            SpaceInvadersTheme {
+                Box(Modifier.height(320.dp)) { SettingsContent(Settings(), onSoundChange = {}, onAutoPlayChange = {}, onDone = {}) }
+            }
+        }
+        composeTestRule.onNodeWithText("Done").performScrollTo().assertIsDisplayed()
     }
 
     @Test

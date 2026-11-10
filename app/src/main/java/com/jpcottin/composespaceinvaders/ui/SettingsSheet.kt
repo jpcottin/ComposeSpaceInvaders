@@ -1,6 +1,8 @@
 package com.jpcottin.composespaceinvaders.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
@@ -133,7 +135,8 @@ fun SettingsContent(
     onHapticsChange: (Boolean) -> Unit = {},
     onResetProgress: () -> Unit = {},
 ) {
-    Column(modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp)) {
+    // Scrolls: a short landscape window or a large font would otherwise cut Done off.
+    Column(modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 8.dp)) {
         Text(
             text = stringResource(R.string.settings),
             style = MaterialTheme.typography.headlineMedium,

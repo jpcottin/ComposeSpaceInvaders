@@ -229,8 +229,9 @@ mothership, pause, level clear, game over and win on a phone, a foldable
 (open and half-opened), a tablet, a TV and the glasses, plus the ten waves
 and the settings screens. The instrumented tests launch the real activity
 and drive it by tap, D-pad and keyboard, pause it from every path, pick a
-level, reset the progress, end a round on a new high score below the podium
-and listen as a screen reader.
+level, reset the progress, scroll the settings down to Done on a short window,
+end a round on a new high score below the podium and listen as a screen
+reader.
 
 ## CI/CD
 
