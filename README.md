@@ -81,6 +81,9 @@ The other screens, as the screenshot tests render them:
   on Back, and on P, Escape or a remote's play/pause button. A tap, OK or the
   same key resumes. When the screen itself went away and comes back, the
   autopilot carries on by itself; a pause the player asked for holds until the tap.
+  A round that comes back, from a pause or from the glasses, gets the
+  post-hit breather: a bomb frozen just above the ship does not land on the
+  very frame the game resumes.
 - **High scores:** a table of five, persisted; gold, silver and bronze on the
   title, and the end screen names the rank of any new entry, podium or not.
 - **Sound:** every effect synthesised in real time: the laser sweep, the

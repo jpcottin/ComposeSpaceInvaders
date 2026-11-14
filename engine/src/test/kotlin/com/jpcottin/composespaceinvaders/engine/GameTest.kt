@@ -799,6 +799,41 @@ class PauseTest {
         assertFalse(g.paused)
     }
 
+    @Test fun aResumedRoundComesBackBehindABreather() {
+        // A bomb frozen a few pixels above the ship would land on the very
+        // frame the round resumed, before the hand is back on the strip.
+        val g = playing().apply { debug.setFormation(y = -5f); debug.clearInvuln() }
+        g.debug.spawnBomb(0f, World.SHIP_Y - World.SHIP_R - 0.03f, vy = 0.8f)
+        g.pause()
+        assertTrue(g.paused)
+        g.tap(); g.update(FRAME)
+        assertFalse(g.paused)
+        assertTrue(g.invuln > 0f)
+        g.run(1f)                            // past the ship and off the bottom
+        assertEquals(Game.START_LIVES, g.lives)
+        assertTrue(g.bombs.isEmpty())
+    }
+
+    @Test fun theAutopilotsOwnResumeGetsTheBreatherToo() {
+        val g = playing().apply { debug.setFormation(y = -5f); debug.clearInvuln() }
+        g.autoPlayActive = true
+        g.pause(); g.resume()
+        assertFalse(g.paused)
+        assertTrue(g.invuln > 0f)
+    }
+
+    @Test fun theHandBackFromTheGlassesGetsTheBreatherToo() {
+        val g = playing().apply { debug.setFormation(y = -5f); debug.clearInvuln() }
+        g.glassesActive = true
+        g.debug.spawnBomb(0f, World.SHIP_Y - World.SHIP_R - 0.03f, vy = 0.8f)
+        g.run(0.4f)
+        assertEquals(1, g.bombs.size)        // the phone's round is frozen meanwhile
+        g.glassesActive = false
+        g.run(1f)
+        assertEquals(Game.START_LIVES, g.lives)
+        assertTrue(g.bombs.isEmpty())
+    }
+
     @Test fun aPauseThePlayerAskedForHoldsTheAutopilotUntilATap() {
         // Back (or P) during an Auto Play round: the autopilot must not
         // unfreeze the round on the next tick, or Back could never leave.
