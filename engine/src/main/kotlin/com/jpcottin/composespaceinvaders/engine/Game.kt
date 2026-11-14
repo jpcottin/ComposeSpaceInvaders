@@ -237,7 +237,14 @@ class Game(private val host: GameHost = GameHost.None) {
     var controlMode: ControlMode = ControlMode.STRIP
     /** True on the phone while the round runs on the glasses: gameplay freezes. */
     var glassesActive: Boolean = false
-        set(value) { if (field != value) { field = value; syncMusic(); syncSiren() } }
+        set(value) {
+            if (field == value) return
+            field = value
+            // The phone's round froze mid-flight while the glasses had it;
+            // it comes back behind the same breather as a resumed pause.
+            if (!value && controlMode == ControlMode.STRIP) breather()
+            syncMusic(); syncSiren()
+        }
 
     // --- high scores ---
     private val table = ArrayList<HighScore>()
@@ -358,7 +365,21 @@ class Game(private val host: GameHost = GameHost.None) {
     /** The screen is back. A human gets a "tap to resume" moment; the
      *  autopilot, which nobody is watching anyway, carries on at once. */
     fun resume() {
-        if (paused && autoPlayActive) { paused = false; syncSiren() }
+        if (paused && autoPlayActive) unpause()
+    }
+
+    private fun unpause() {
+        paused = false
+        breather()
+        syncSiren()
+    }
+
+    /** A round frozen mid-flight comes back behind the post-hit breather: a
+     *  bomb frozen a few pixels above the ship would otherwise land on the
+     *  very frame the game resumed, before the hand is back on the strip.
+     *  Nothing to shield in the interlude, on the title or an end screen. */
+    private fun breather() {
+        if (state == State.PLAYING) invuln = maxOf(invuln, RESUME_BREATHER)
     }
 
     // ── Input (world coordinates) ─────────────────────────────────────────────
@@ -679,7 +700,7 @@ class Game(private val host: GameHost = GameHost.None) {
         // The screen coming back is resume()'s business.
         if (paused) {
             if (state != State.PLAYING && state != State.LEVEL_CLEAR) paused = false
-            else if (tapped) { paused = false; syncSiren() }
+            else if (tapped) unpause()
             else return
         }
 
@@ -1494,6 +1515,8 @@ class Game(private val host: GameHost = GameHost.None) {
         const val MAX_FRAME = 0.05f
         const val LEVEL_CLEAR_PAUSE = 1.8f
         const val END_SCREEN_GRACE = 0.6f       // an end screen ignores taps this long
+        /** Invulnerability granted when a frozen round resumes (the post-hit one). */
+        const val RESUME_BREATHER = 1.5f
         const val DROP_CHANCE = 0.08f           // per kill
         const val SAUCER_SCORE = 100
         const val POWER_UP_SCORE = 25
