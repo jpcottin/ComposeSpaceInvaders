@@ -106,7 +106,8 @@ The other screens, as the screenshot tests render them:
 - **Play on AI Glasses:** with Display Glasses paired, the Glasses row in
   Settings hands the whole game to the glasses' projected display, where the
   touchbar drives it: finger position steers, contact fires. The phone shows
-  an "on glasses" banner and waits; the same row brings the game home.
+  an "on glasses" banner and waits; the same row brings the game home, and
+  so does a pair that disconnects.
 
 ## Modules
 
