@@ -288,6 +288,9 @@ fun GameScreen(
                 // Every finger reaches the engine in world coordinates; the
                 // engine decides what a touch does from where it lands. A
                 // change a button already consumed (the gear) is not a tap.
+                // The changes are read, never consumed: a button's click
+                // gives up on a press its parent consumed, so consuming here
+                // would swallow every tap on the gear and the level arrows.
                 awaitPointerEventScope {
                     while (true) {
                         val event = awaitPointerEvent()
@@ -302,7 +305,6 @@ fun GameScreen(
                                 change.changedToUp() -> game.onPointerUp(id)
                                 change.pressed -> game.onPointerMove(id, wx, wy)
                             }
-                            change.consume()
                         }
                     }
                 }
