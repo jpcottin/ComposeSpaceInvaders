@@ -169,7 +169,7 @@ The other screens, as the screenshot tests render them:
   HUD, the gear, the level pick and the end screen carry descriptions.
 - **Languages.** English, French and Spanish, with a generated locale
   config so the app appears in the system's per-app language picker.
-- `minSdk 26`, `targetSdk 37`, Jetpack Compose with the Compose BOM, Kotlin
+- `minSdk 26`, `compileSdk 37.1`, `targetSdk 37`, Jetpack Compose with the Compose BOM, Kotlin
   2.4, AGP 9.
 
 ## The Auto Play bench
