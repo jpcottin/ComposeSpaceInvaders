@@ -101,10 +101,15 @@ class GameViewModel(
         if (role == Role.GLASSES) game.controlMode = Game.ControlMode.TOUCHBAR
         else viewModelScope.launch {
             // The phone freezes while the glasses play, and adopts whatever the
-            // glasses instance scored when the session ends.
+            // glasses instance scored and reached when the session ends, so the
+            // title's level pick offers the waves the glasses got to.
             GlassesSession.active.collect { active ->
                 game.glassesActive = active
-                if (!active) game.restoreHighScores(decodeScores(prefs.first()[KEY_HIGH_SCORES]) + game.highScores)
+                if (!active) {
+                    val stored = prefs.first()
+                    game.restoreHighScores(decodeScores(stored[KEY_HIGH_SCORES]) + game.highScores)
+                    game.furthestLevel = maxOf(game.furthestLevel, stored[KEY_FURTHEST_LEVEL] ?: 1)
+                }
             }
         }
         // The round saved by a previous instance of this process, if any.
@@ -232,7 +237,7 @@ class GameViewModel(
         private val KEY_AUTO_PLAY = booleanPreferencesKey("auto_play")
         private val KEY_HAPTICS = booleanPreferencesKey("haptics")
         private val KEY_HIGH_SCORES = stringPreferencesKey("high_scores")
-        private val KEY_FURTHEST_LEVEL = intPreferencesKey("furthest_level")
+        internal val KEY_FURTHEST_LEVEL = intPreferencesKey("furthest_level")
         private const val TAG = "GameViewModel"
         internal const val KEY_SESSION = "session"
         /** Intent extra: start an Auto Play round as soon as the game is up. */
