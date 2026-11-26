@@ -25,7 +25,9 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.edit
 import com.jpcottin.composespaceinvaders.glasses.GlassesSession
+import kotlinx.coroutines.job
 import kotlinx.coroutines.runBlocking
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelStore
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -96,8 +98,7 @@ class AppLayerTest {
             assertEquals(3, vm.game.level)
             assertTrue("a restored round should wait for the player", vm.game.paused)
         } finally {
-            ViewModelStore().also { it.put("vm", vm) }.clear()   // onCleared: audio released
-            scope.cancel()
+            closeViewModel(vm, scope)
         }
     }
 
@@ -124,12 +125,21 @@ class AppLayerTest {
             }
             assertEquals(6, furthest)
         } finally {
-            instrumentation.runOnMainSync {
-                GlassesSession.bringBack()
-                ViewModelStore().also { it.put("vm", vm) }.clear()
-            }
-            scope.cancel()
+            instrumentation.runOnMainSync { GlassesSession.bringBack() }
+            closeViewModel(vm, scope)
         }
+    }
+
+    /**
+     * Clear [vm] (onCleared releases the audio), wait for the reads it still
+     * has in flight to wind down, and only then close the store's [scope]: a
+     * store closed under a pending read completes it empty, and the read
+     * throws on the main thread and fails the test.
+     */
+    private fun closeViewModel(vm: GameViewModel, scope: CoroutineScope) {
+        ViewModelStore().also { it.put("vm", vm) }.clear()
+        runBlocking { vm.viewModelScope.coroutineContext.job.join() }
+        scope.cancel()
     }
 
     @Test
