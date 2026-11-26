@@ -23,6 +23,9 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.edit
+import com.jpcottin.composespaceinvaders.glasses.GlassesSession
+import kotlinx.coroutines.runBlocking
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelStore
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -94,6 +97,37 @@ class AppLayerTest {
             assertTrue("a restored round should wait for the player", vm.game.paused)
         } finally {
             ViewModelStore().also { it.put("vm", vm) }.clear()   // onCleared: audio released
+            scope.cancel()
+        }
+    }
+
+    @Test
+    fun theLevelsReachedOnTheGlassesComeHomeWithTheGame() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        val store = PreferenceDataStoreFactory.create(scope = scope) {
+            File(context.cacheDir, "glasses-${System.nanoTime()}.preferences_pb")
+        }
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        lateinit var vm: GameViewModel
+        instrumentation.runOnMainSync { vm = GameViewModel(store, SavedStateHandle(), vibrator = null) }
+        try {
+            instrumentation.runOnMainSync { GlassesSession.setActive(true) }
+            // The glasses instance reaches level 6 and records it in the shared store.
+            runBlocking { store.edit { it[GameViewModel.KEY_FURTHEST_LEVEL] = 6 } }
+            instrumentation.runOnMainSync { GlassesSession.bringBack() }
+            var furthest = 0
+            for (i in 0 until 100) {
+                instrumentation.runOnMainSync { furthest = vm.game.furthestLevel }
+                if (furthest == 6) break
+                Thread.sleep(20)
+            }
+            assertEquals(6, furthest)
+        } finally {
+            instrumentation.runOnMainSync {
+                GlassesSession.bringBack()
+                ViewModelStore().also { it.put("vm", vm) }.clear()
+            }
             scope.cancel()
         }
     }
